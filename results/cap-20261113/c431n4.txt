@@ -1,0 +1,21 @@
+cap 5 uF: 64ms CTB 0 CTC 0 STA 10 = nan F (factory cal)
+cap 5 uF: 1331ms CTB 22 CTC 2203918 STA 10 (flag missed: counters stopped) = 4.20568e-07 F (factory cal)
+cap 5 uF: 1152ms CTB 21 CTC 2104785 STA 10 = 4.20778e-07 F (factory cal)
+cap 5 uF: 1157ms CTB 21 CTC 2105400 STA 10 = 4.20901e-07 F (factory cal)
+cap 5 uF: 1164ms CTB 21 CTC 2105337 STA 10 = 4.20889e-07 F (factory cal)
+cap 5 uF: 1165ms CTB 21 CTC 2106938 STA 10 = 4.21211e-07 F (factory cal)
+cap 5 uF: mean 4.20869e-07 F over 5, spread 0.153%
+cap 50 uF: 63ms CTB 1 CTC 43255 STA 10 = 1.76077e-06 F (factory cal)
+cap 50 uF: 64ms CTB 2 CTC 52557 STA 50 = 1.05947e-06 F (factory cal)
+cap 50 uF: 63ms CTB 2 CTC 54852 STA 10 = 1.10687e-06 F (factory cal)
+cap 50 uF: 64ms CTB 2 CTC 53994 STA 50 = 1.08915e-06 F (factory cal)
+cap 50 uF: 63ms CTB 2 CTC 60280 STA 50 = 1.21899e-06 F (factory cal)
+cap 50 uF: 63ms CTB 2 CTC 53645 STA 10 = 1.08194e-06 F (factory cal)
+cap 50 uF: mean 1.21953e-06 F over 6, spread 57.5%
+cap 500 uF: 64ms CTB 2 CTC 45200 STA 10 = 1.82673e-06 F (factory cal)
+cap 500 uF: 63ms CTB 5 CTC 56771 STA 10 = 8.34446e-07 F (factory cal)
+cap 500 uF: 64ms CTB 5 CTC 57581 STA 10 = 8.4874e-07 F (factory cal)
+cap 500 uF: 63ms CTB 5 CTC 57480 STA 10 = 8.46958e-07 F (factory cal)
+cap 500 uF: 64ms CTB 5 CTC 57975 STA 10 = 8.55693e-07 F (factory cal)
+cap 500 uF: 63ms CTB 5 CTC 58559 STA 10 = 8.65999e-07 F (factory cal)
+cap 500 uF: mean 1.01309e-06 F over 6, spread 97.9%

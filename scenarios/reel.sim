@@ -1,0 +1,273 @@
+# Stills for the highlight reel: one shot per beat, on the dark theme, then the same reading in all four
+# themes. Shots are build/sim-reel-*.bmp; `make sim` converts them to PNG.
+
+menu THEME
+key RIGHT
+run 300
+expect menu dark
+key UTILITY
+run 300
+
+# 1. Hook: ohms on a 10 kOhm resistor.
+key OHM
+set ohm 10000
+run 3000
+expect reading 10.000
+shot build/sim-reel-01-ohms.bmp
+
+# 2. Continuity on a short.
+key OHM
+set ohm 0.4
+run 800
+shot build/sim-reel-02-continuity.bmp
+
+# 3. Beep styles: the menu on WARBLE.
+menu BEEP STYLE
+key RIGHT
+key RIGHT
+key RIGHT
+key RIGHT
+key RIGHT
+key RIGHT
+run 600
+shot build/sim-reel-03-beep-style.bmp
+key UTILITY
+run 300
+
+# 4. Diode: a red LED.
+key OHM
+set diode 1.852
+run 800
+shot build/sim-reel-04-diode-led.bmp
+
+# 5. Auto-hold: a 9 V battery, held after the probes lift.
+key V
+set dcv 9.412
+run 1500
+key RUNSTOP
+key RUNSTOP
+run 300
+expect status A-HOLD
+run 2500
+set dcv 0
+run 2500
+expect reading 9.412
+shot build/sim-reel-05-autohold.bmp
+key RUNSTOP
+run 300
+
+# 6. Bar graph with a pot at about two thirds.
+menu BAR GRAPH
+key RIGHT
+run 300
+key UTILITY
+set dcv 3.271
+run 1500
+shot build/sim-reel-06-bargraph.bmp
+menu BAR GRAPH
+key RIGHT
+run 300
+key UTILITY
+run 300
+
+# 7. Trend graph: a pot turned up and back down.
+set dcv 0.5
+run 1500
+key F3
+key F3
+key F3
+run 300
+key F4
+run 300
+set dcv 1.0
+run 3000
+set dcv 2.0
+run 3000
+set dcv 3.0
+run 3000
+set dcv 4.0
+run 3000
+set dcv 3.0
+run 3000
+set dcv 1.5
+run 3000
+shot build/sim-reel-07-graph.bmp
+key F3
+key F3
+run 300
+
+# 8. Dual: AC volts with frequency, a 12 V transformer.
+key V
+set dcv 0
+set acv 12.47
+set freq 60.01
+run 2000
+key DUAL
+run 300
+key F1
+run 5000
+shot build/sim-reel-08-dual.bmp
+key DUAL
+run 300
+
+# 9. Statistics on a noisy 5 V input.
+send CONF:VOLT:DC
+run 100
+set acv 0
+set dcv 4.998
+set noise 300
+run 1000
+key MATH
+run 8000
+shot build/sim-reel-09-stats.bmp
+key MATH
+key MATH
+set noise 0
+run 300
+
+# 10. A recording, browsed with the cursor.
+send CONF:VOLT:DC
+run 100
+key RECORD
+run 100
+key F1
+set dcv 1.0
+run 6000
+set dcv 3.0
+run 8000
+set dcv 2.0
+run 6000
+key F1
+run 300
+key DOWN
+key DOWN
+key DOWN
+key DOWN
+key DOWN
+key DOWN
+run 300
+shot build/sim-reel-10-recording.bmp
+key F5
+run 300
+
+# 11. Capacitance on a 47 uF part.
+key CAP
+set cap 47.1e-6
+run 8000
+expect reading 47.100
+shot build/sim-reel-11-cap.bmp
+
+# 12. The Utility menu.
+menu BACKLIGHT
+run 300
+shot build/sim-reel-12-utility.bmp
+key UTILITY
+run 300
+
+# 13. One reading in each theme (dark is current: stock, dark, amber, paper, synthwave).
+send CONF:VOLT:DC
+run 100
+set dcv 5.0012
+run 2000
+shot build/sim-reel-13-theme-dark.bmp
+menu THEME
+key RIGHT
+run 300
+key UTILITY
+run 1000
+shot build/sim-reel-14-theme-amber.bmp
+menu THEME
+key RIGHT
+run 300
+key UTILITY
+run 1000
+shot build/sim-reel-15-theme-paper.bmp
+menu THEME
+key RIGHT
+run 300
+key UTILITY
+run 1000
+shot build/sim-reel-15s-theme-synthwave.bmp
+menu THEME
+key RIGHT
+run 300
+key UTILITY
+run 1000
+shot build/sim-reel-16-theme-stock.bmp
+
+# 17. Mini trend and histogram under the big reading (B58), dark theme,
+# a slowly turned pot.
+menu THEME
+key RIGHT
+run 300
+key UTILITY
+run 300
+send CONF:VOLT:DC
+run 100
+set noise 200
+set dcv 1.20
+run 2000
+key F3
+key F4
+run 300
+set dcv 1.50
+run 3000
+set dcv 2.10
+run 3000
+set dcv 2.80
+run 3000
+set dcv 3.30
+run 3000
+set dcv 2.95
+run 3000
+set dcv 3.05
+run 3000
+expect key3 NUM+G
+shot build/sim-reel-17-mini-trend.bmp
+key F3
+run 300
+expect key3 NUM+H
+shot build/sim-reel-18-mini-hist.bmp
+
+# 19. Power and energy (B21): a Li-ion cell charging at 4.1 V, 0.45 A, on
+# the A jack, for an hour: watts big, Wh / mAh / time below. Dark theme.
+key F3
+key F3
+key F3
+run 300
+expect key3 NUM
+set jack_a 1
+key I
+key F5
+set dci 0.45
+set dcv 4.10
+run 2000
+key DUAL
+key F3
+run 15000
+key F4
+run 3600000
+expect key5 POWER
+shot build/sim-reel-19-power.bmp
+
+# 20. The end card: the same, in synthwave.
+menu THEME
+key RIGHT
+key RIGHT
+key RIGHT
+run 300
+expect menu synthwave
+key UTILITY
+run 1000
+shot build/sim-reel-20-power-synthwave.bmp
+menu THEME
+key RIGHT
+key RIGHT
+run 300
+expect menu dark
+key UTILITY
+key F5
+run 300
+key F5
+set jack_a 0
+run 300

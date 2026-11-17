@@ -1,0 +1,42 @@
+cap: configured 5 uF; read back identical
+cap gate: INTF 04 CTA start BF0000 end 089C97 = 4824215 ticks
+cap 5 uF: 2087ms CTB 1 CTC 2379338 STA 50 (flag missed: counters stopped) = 1.00458e-05 F (factory cal)
+cap gate: INTF 04 CTA start BF0000 end 08C992 = 4835730 ticks
+cap 5 uF: 2397ms CTB 1 CTC 2390786 STA 50 (flag missed: counters stopped) = 1.00942e-05 F (factory cal)
+cap gate: INTF 04 CTA start BF0000 end 086086 = 4808838 ticks
+cap 5 uF: 2398ms CTB 1 CTC 2370046 STA 50 (flag missed: counters stopped) = 1.00066e-05 F (factory cal)
+cap gate: INTF 05 CTA start BF0000 end 08C0D7 = 4833495 ticks
+cap 5 uF: 2301ms CTB 1 CTC 2386504 STA 50 = 1.00761e-05 F (factory cal)
+cap gate: INTF 05 CTA start BF0000 end 08BEE7 = 4832999 ticks
+cap 5 uF: 2411ms CTB 1 CTC 2385028 STA 50 = 1.00698e-05 F (factory cal)
+cap gate: INTF 05 CTA start BF0000 end 08629D = 4809373 ticks
+cap 5 uF: 2404ms CTB 1 CTC 2376531 STA 50 = 1.0034e-05 F (factory cal)
+cap 5 uF: mean 1.00544e-05 F over 6, spread 0.871%
+cap: configured 50 uF; read back identical
+cap gate: INTF 05 CTA start BF0000 end 026FC7 = 4419527 ticks
+cap 50 uF: 1305ms CTB 9 CTC 2161462 STA 50 = 9.89504e-06 F (factory cal)
+cap gate: INTF 04 CTA start BF0000 end 02691F = 4417823 ticks
+cap 50 uF: 1466ms CTB 9 CTC 2160350 STA 50 (flag missed: counters stopped) = 9.88994e-06 F (factory cal)
+cap gate: INTF 04 CTA start BF0000 end 02564A = 4413002 ticks
+cap 50 uF: 1466ms CTB 9 CTC 2158071 STA 50 (flag missed: counters stopped) = 9.87948e-06 F (factory cal)
+cap gate: INTF 04 CTA start BF0000 end 0276A2 = 4421282 ticks
+cap 50 uF: 1466ms CTB 9 CTC 2162348 STA 50 (flag missed: counters stopped) = 9.89911e-06 F (factory cal)
+cap gate: INTF 04 CTA start BF0000 end 02AC11 = 4434961 ticks
+cap 50 uF: 1467ms CTB 9 CTC 2169300 STA 50 (flag missed: counters stopped) = 9.93102e-06 F (factory cal)
+cap gate: INTF 04 CTA start BF0000 end 02904D = 4427853 ticks
+cap 50 uF: 1466ms CTB 9 CTC 2165065 STA 50 (flag missed: counters stopped) = 9.91158e-06 F (factory cal)
+cap 50 uF: mean 9.90103e-06 F over 6, spread 0.521%
+cap: configured 500 uF; read back identical
+cap gate: INTF 05 CTA start BF0000 end 0140F8 = 4342008 ticks
+cap 500 uF: 1202ms CTB 19 CTC 2132845 STA 10 = 9.7375e-06 F (factory cal)
+cap gate: INTF 05 CTA start BF0000 end 0143B7 = 4342711 ticks
+cap 500 uF: 1195ms CTB 19 CTC 2133138 STA 10 = 9.73886e-06 F (factory cal)
+cap gate: INTF 04 CTA start BF0000 end 013D5F = 4341087 ticks
+cap 500 uF: 1362ms CTB 19 CTC 2132180 STA 10 (flag missed: counters stopped) = 9.73441e-06 F (factory cal)
+cap gate: INTF 05 CTA start BF0000 end 013C23 = 4340771 ticks
+cap 500 uF: 1188ms CTB 19 CTC 2131829 STA 10 = 9.73278e-06 F (factory cal)
+cap gate: INTF 05 CTA start BF0000 end 013993 = 4340115 ticks
+cap 500 uF: 1195ms CTB 19 CTC 2131828 STA 10 = 9.73278e-06 F (factory cal)
+cap gate: INTF 05 CTA start BF0000 end 0140CE = 4341966 ticks
+cap 500 uF: 1195ms CTB 19 CTC 2132670 STA 10 = 9.73669e-06 F (factory cal)
+cap 500 uF: mean 9.73551e-06 F over 6, spread 0.0625%

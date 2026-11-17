@@ -1,0 +1,14 @@
+cap: configured 500 uF; read back identical
+cap gate: INTF 05 CTA start BF0000 end 2604F1 = 6751473 ticks
+cap 500 uF: 4126ms CTB 1 CTC 3307047 STA 50 = 0.000291632 F (factory cal)
+cap gate: INTF 05 CTA start BF0000 end 261573 = 6755699 ticks
+cap 500 uF: 3375ms CTB 1 CTC 3323351 STA 50 = 0.000293071 F (factory cal)
+cap gate: INTF 05 CTA start BF0000 end 25F8B9 = 6748345 ticks
+cap 500 uF: 3369ms CTB 1 CTC 3310861 STA 50 = 0.000291969 F (factory cal)
+cap gate: INTF 05 CTA start BF0000 end 25E3AF = 6742959 ticks
+cap 500 uF: 3369ms CTB 1 CTC 3314046 STA 50 = 0.00029225 F (factory cal)
+cap gate: INTF 05 CTA start BF0000 end 25DABE = 6740670 ticks
+cap 500 uF: 3369ms CTB 1 CTC 3306251 STA 50 = 0.000291562 F (factory cal)
+cap gate: INTF 05 CTA start BF0000 end 2619E6 = 6756838 ticks
+cap 500 uF: 3375ms CTB 1 CTC 3324773 STA 50 = 0.000293196 F (factory cal)
+cap 500 uF: mean 0.00029228 F over 6, spread 0.559%

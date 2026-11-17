@@ -1,0 +1,33 @@
+.pio/
+build/
+.vscode/
+.DS_Store
+*.o
+*.elf
+*.map
+
+__pycache__/
+*.pyc
+
+# Chip dumps (backups/) ARE committed in the private development repo, by the
+# owner's choice: a backup on one disk is not a backup. They hold OWON's
+# firmware and a meter's serial number, so the public repo is a squashed
+# export without them.
+
+# Third-party files, not ours to redistribute. Each folder's README says
+# where to get them; `make setup` checks the image and generates the rest.
+firmware/*.bin
+docs/manual/*
+!docs/manual/README.md
+docs/datasheets/*
+!docs/datasheets/README.md
+docs/fonts/
+lib/ui/stock_fonts.h
+
+# Ghidra: project is regenerable with ghidra/run.sh; decomp output is large
+ghidra/proj/
+ghidra/out/
+
+# Chip dumps: local only in this repo.
+backups/*
+!backups/.gitkeep

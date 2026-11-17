@@ -1,0 +1,15 @@
+-std=c11
+-Wall
+-Wextra
+-DUNITY_INCLUDE_DOUBLE
+-Ilib/afe
+-Ilib/display
+-Ilib/measure
+-Ilib/ui
+-Ilib/app
+-Ilib/sim
+-I.pio/libdeps/native/Unity/src
+-Ilib/store
+-Ilib/hal
+-Ilib/scpi
+-Ilib/datalog

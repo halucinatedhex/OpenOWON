@@ -1,0 +1,6 @@
+# Hooks applied on top of the stock image by attic/extension/build-ext.sh.
+# Each line rewrites one call site so it lands in extension code.
+#
+# Example: the USART1 ISR tail-calls the SCPI enqueue at 0x08004834.
+# Redirect it to our hook, which filters EXT:* then forwards to stock.
+b 0x08004834 0x0802003C

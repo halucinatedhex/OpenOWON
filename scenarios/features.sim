@@ -1,0 +1,148 @@
+# Newer panel features: bar graph (B37), auto-hold (B15), the beeper's
+# settings (B57). `menu <LABEL>` jumps to a Utility row by name. Each shot is in build/ for review; expectations are checks.
+
+# Bar graph on.
+menu BAR GRAPH
+key RIGHT
+run 300
+expect menu ON
+key UTILITY
+set dcv 3.3
+run 1500
+expect reading 3.3000
+shot build/sim-30-bargraph-dcv.bmp
+
+set dcv -1.2
+run 1500
+expect reading -1.2000
+shot build/sim-31-bargraph-negative.bmp
+
+key OHM
+set ohm 3900
+run 3000
+shot build/sim-32-bargraph-ohm.bmp
+
+# Auto-hold on (RUN/STOP twice: Run -> Hold -> Auto-hold): a stable reading
+# is held after the probes lift.
+key V
+run 100
+key RUNSTOP
+key RUNSTOP
+run 300
+expect status A-HOLD
+set dcv 4.2
+run 2500
+set dcv 0
+run 2500
+expect reading 4.2000
+shot build/sim-33-autohold.bmp
+
+# The beeper's settings, with the envelope (B57).
+menu BEEP STYLE
+key RIGHT
+run 600
+expect menu SOFT
+menu RELEASE
+key RIGHT
+run 600
+expect menu 80 ms
+shot build/sim-34-beep-settings.bmp
+key UTILITY
+run 300
+
+# Browsing a recording (B36): record 20 s of a stepping input, then move the
+# cursor back along the plot with DOWN.
+send CONF:VOLT:DC
+run 100
+key RECORD
+run 100
+key F1
+set dcv 1.0
+run 6000
+set dcv 3.0
+run 8000
+set dcv 2.0
+run 6000
+key F1
+run 300
+key DOWN
+key DOWN
+key DOWN
+key DOWN
+key DOWN
+key DOWN
+key DOWN
+key DOWN
+run 300
+shot build/sim-35-browse-recording.bmp
+key F5
+run 300
+
+# Histogram (B38): VIEW cycles NUM -> GRAPH -> HISTO. A noisy DC input
+# fills it.
+send CONF:VOLT:DC
+run 100
+set dcv 2.5
+set noise 600
+key F3
+key F3
+key F3
+key F3
+run 60000
+expect key3 HISTO
+shot build/sim-36-histogram.bmp
+key F3
+run 300
+expect key3 NUM
+
+# Mini views under the big reading (B58): VIEW once for the trend, twice
+# for its histogram. A slowly turned input for the trend.
+set noise 300
+set dcv 1.0
+key F3
+run 4000
+set dcv 2.0
+run 4000
+set dcv 3.0
+run 4000
+set dcv 2.2
+run 4000
+expect key3 NUM+G
+shot build/sim-37-mini-trend.bmp
+key F3
+run 300
+expect key3 NUM+H
+shot build/sim-38-mini-hist.bmp
+key F3
+key F3
+key F3
+run 300
+expect key3 NUM
+set noise 0
+
+# B21: power and energy. A 12 V supply into a load drawing 450 mA, measured
+# on DC current with DUAL -> POWER; the volts alternate with the current.
+# An hour of it: 5.4 W, 5.4 Wh, 450 mAh. Through the A jack: on our meter
+# the 50 / 500 mA ranges pair with 50 / 500 mV only (PA8, test-plan.md).
+key RUNSTOP
+run 300
+expect status
+set jack_a 1
+key I
+key F5                     # the A jack
+set dci 0.45
+set dcv 12.0
+run 2000
+key DUAL
+key F3
+run 15000
+expect key4 Wh
+key F4
+run 3600000
+expect unit W
+expect key5 POWER
+shot build/sim-39-power.bmp
+key F5
+run 300
+key F5                     # back to the mA jack
+set jack_a 0

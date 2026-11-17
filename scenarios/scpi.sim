@@ -1,0 +1,40 @@
+# Remote control over the simulated serial port.
+# Replies follow stock's formats: %E in SI units, 1E+9 for overload,
+# quoted FUNC? names.
+
+send *IDN?
+run 5
+expect reply OWON,XDM1241,SIM0001,OpenOWON-0.1-dev
+
+set dcv 3.3
+run 1000
+send MEAS?
+run 5
+expect reply 3.300000E+00
+
+send CONF:RES
+set ohm 47000
+run 3000
+send FUNC?
+run 5
+expect reply "RES"
+send MEAS?
+run 5
+expect replynear 47000 1e-5
+expect unit kOhm
+shot build/sim-20-scpi-res.bmp
+
+send CONF:CONT
+run 5
+send FUNC?
+run 5
+expect reply "CONT"
+
+send SYST:REM
+run 50
+expect status RMT
+shot build/sim-21-scpi-remote.bmp
+send BAD:CMD
+send SYST:ERR?
+run 5
+expect reply -113,"Undefined header"

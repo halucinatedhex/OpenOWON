@@ -1,0 +1,53 @@
+/*
+ * Example transport for the XDM1241 digital board. Not compiled into the
+ * host test build; copy into src/ once the GD32 SPL headers are available.
+ *
+ * Pins confirmed from the stock bit-bang at 0x080077C8:
+ *   PB12 CS   PB13 CK   PB14 DO (in)   PB15 DI (out)
+ */
+#include "gd32f30x.h"
+#include "hy3131.h"
+
+#define AFE_PORT  GPIOB
+#define PIN_CS    GPIO_PIN_12
+#define PIN_CK    GPIO_PIN_13
+#define PIN_DO    GPIO_PIN_14
+#define PIN_DI    GPIO_PIN_15
+
+static void b_cs(bool a)    { if (a) gpio_bit_reset(AFE_PORT, PIN_CS);   /* active low */
+                              else   gpio_bit_set(AFE_PORT, PIN_CS); }
+static void b_clk(bool v)   { v ? gpio_bit_set(AFE_PORT, PIN_CK) : gpio_bit_reset(AFE_PORT, PIN_CK); }
+static void b_mosi(bool v)  { v ? gpio_bit_set(AFE_PORT, PIN_DI) : gpio_bit_reset(AFE_PORT, PIN_DI); }
+static bool b_miso(void)    { return gpio_input_bit_get(AFE_PORT, PIN_DO) != RESET; }
+static void b_delay(void)   { for (volatile int i = 0; i < 20; i++) { } }  /* tune to the isolator */
+
+static const hy3131_io_t AFE_IO = { b_cs, b_clk, b_mosi, b_miso, b_delay };
+
+void afe_board_init(void)
+{
+    rcu_periph_clock_enable(RCU_GPIOB);
+    gpio_init(AFE_PORT, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, PIN_CS | PIN_CK | PIN_DI);
+    gpio_init(AFE_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, PIN_DO);
+    hy3131_init(&AFE_IO);
+}
+
+/*
+ * Minimal bring-up. Proves the whole chain - GPIO, isolator, chip - before
+ * any measurement work. Do NOT extend this into a mode table by guesswork:
+ * capture the stock firmware's register writes with a logic analyser while
+ * changing function and range, and transcribe those.
+ */
+int afe_bringup(int32_t *reading)
+{
+    hy3131_write8(HY_R31, 0x40);          /* ENBIAS: bias for the analog block */
+    hy3131_write8(HY_R2F, 0x80);          /* ENVS: voltage reference generator */
+    hy3131_write8(HY_R23, 0x80);          /* ENAD1: enable the 24-bit ADC      */
+
+    for (int i = 0; i < 1000; i++) {
+        if (hy3131_read8(HY_INTF) & HY_F_AD1) {
+            *reading = hy3131_read_ad1();
+            return 0;
+        }
+    }
+    return -1;                             /* no conversion-ready flag */
+}

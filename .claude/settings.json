@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "permissions": {
+    "allow": [
+      "Bash(./scripts/probe-info.sh)",
+      "Bash(./scripts/backup.sh)",
+      "Bash(./scripts/verify.sh)",
+      "Bash(./scripts/verify.sh *)",
+      "Bash(./scripts/debug.sh)",
+      "Bash(pio run)",
+      "Bash(pio run -e *)",
+      "Bash(pio test *)",
+      "Bash(pio check *)",
+      "Bash(pio pkg *)",
+      "Bash(pio platform *)",
+      "Bash(pio device list*)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(shasum *)",
+      "Bash(xxd *)",
+      "Bash(arm-none-eabi-objdump *)",
+      "Bash(arm-none-eabi-nm *)",
+      "Bash(arm-none-eabi-readelf *)",
+      "Bash(arm-none-eabi-size *)"
+    ],
+    "ask": [
+      "Bash(./scripts/flash.sh*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/guard-flash.sh\"",
+            "statusMessage": "Checking for a verified firmware backup"
+          }
+        ]
+      }
+    ]
+  }
+}

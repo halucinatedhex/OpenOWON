@@ -1,0 +1,167 @@
+# A tour of every function. Run with: make sim
+# Each block sets a physical input, lets the meter settle, checks what the
+# app shows, and saves the panel.
+
+set dcv 1.2345
+run 1000
+expect reading 1.2345
+expect range AUTO 5 V
+shot build/sim-01-dcv.bmp
+
+set dcv 0.0123
+run 2000
+expect reading 12.300
+expect unit mV DC
+shot build/sim-02-dcv-autorange.bmp
+
+key V
+set acv 0.2301
+run 2000
+expect reading 230.10
+shot build/sim-03-acv.bmp
+
+key I
+set dci 0.0123
+run 1000
+expect reading 12.300
+expect unit mA DC
+shot build/sim-04-dci.bmp
+
+key OHM
+set ohm 4700
+run 2500
+expect reading 4.7000
+shot build/sim-05-ohm.bmp
+
+key OHM
+set ohm 12.5
+run 600
+expect reading 12.5
+shot build/sim-06-continuity.bmp
+
+key OHM
+set diode 0.612
+run 600
+expect reading 0.6120
+shot build/sim-07-diode.bmp
+
+key CAP
+set cap 2.2e-6
+run 2000
+expect reading 2.2000
+shot build/sim-08-cap.bmp
+
+key FREQ
+set freq 50
+set duty 50
+run 2000
+expect reading 50.000
+expect sub DUTY 50.0%
+shot build/sim-09-freq.bmp
+
+key TEMP
+set temp 215.5
+set cj 24
+run 4000
+expect reading 215.5
+expect sub CJ 24.0 °C   EMF 7.799 mV
+shot build/sim-10-thermocouple.bmp
+
+key V
+set dcv 4.98
+set noise 300
+run 1000
+key MATH
+run 6000
+shot build/sim-11-stats.bmp
+key F3
+key F3
+key F3
+run 400
+shot build/sim-12-graph.bmp
+
+# Graph softkeys: span 4 minutes, fixed scale (the 5 V range), paused.
+key F1
+key F2
+run 12000
+expect key1 4 min
+expect key2 RANGE
+shot build/sim-13-graph-range.bmp
+key F3
+key F3
+run 400
+expect key3 NUM
+key MATH
+key MATH
+
+# Utility menu: backlight down to 70%, then to the dim timeout.
+key UTILITY
+key LEFT
+key LEFT
+key LEFT
+run 400
+expect menu 70%
+key DOWN
+key RIGHT
+key RIGHT
+run 400
+expect menu 5 min
+shot build/sim-14-utility.bmp
+key UTILITY
+run 400
+expect menu (closed)
+
+# Recording at 200 ms for 20 s while the input steps: DC volts converts
+# every 246 ms, so that is every new reading, ~4 a second (79 points).
+key RECORD
+key F3
+key F3
+key F3
+key F3
+key F3
+key F3
+key F3
+key F3
+run 400
+expect key3 200 ms
+set noise 0
+set dcv 1.0
+run 2000
+key F1
+run 7000
+set dcv 3.0
+run 7000
+set dcv 2.0
+run 6000
+key F1
+run 400
+expect sub STOP 79/10668
+shot build/sim-15-record.bmp
+key F5
+run 400
+expect menu (closed)
+print
+
+# Dual display: AC volts with frequency, as stock (manual p. 27).
+key V
+set acv 0.2301
+set freq 50.032
+set duty 50
+run 2000
+expect func ACV
+key DUAL
+run 200
+expect key1 FREQ
+key F1
+run 4000
+expect reading 230.10
+expect sub 50.032 Hz   500 mV   FREQ
+shot build/sim-16-dual.bmp
+key DUAL
+run 400
+expect reading 50.032
+shot build/sim-17-dual-swapped.bmp
+key F5
+run 400
+expect status
+print

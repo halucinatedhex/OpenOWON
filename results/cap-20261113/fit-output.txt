@@ -1,0 +1,68 @@
+== 50 nF
+  C=   0.00000uF cpc=      229.8 cyc=  307 gate=   64ms fac=   0.00032uF 
+  C=   0.00755uF cpc=     5290.3 cyc=   13 gate=   63ms fac=   0.01618uF 
+  C=   0.04836uF cpc=    60718.0 cyc=    1 gate=   63ms fac=   0.18986uF (dropped)
+  fit: cpc = 229.8 + 670261.4/uF
+       0.0075uF ->    0.0075uF   +0.00%
+== 500 nF
+  C=   0.00000uF cpc=      226.4 cyc=  311 gate=   63ms fac=   0.00032uF 
+  C=   0.00755uF cpc=     5099.4 cyc=   14 gate=   64ms fac=   0.01560uF 
+  C=   0.04836uF cpc=    60723.0 cyc=    1 gate=   63ms fac=   0.19000uF (dropped)
+  fit: cpc = 226.4 + 645428.0/uF
+       0.0075uF ->    0.0075uF   +0.00%
+== 5 uF
+  C=   0.00000uF cpc=      344.3 cyc=  374 gate=   63ms fac=  -0.00105uF 
+  C=   0.00755uF cpc=     8060.5 cyc=   16 gate=   64ms fac=   0.03154uF 
+  C=   0.04836uF cpc=    27558.5 cyc=    2 gate=   63ms fac=   0.11388uF (dropped)
+  C=   0.11440uF cpc=    52840.0 cyc=    1 gate=   64ms fac=   0.22065uF (dropped)
+  C=   0.43140uF cpc=   100254.1 cyc=   21 gate= 1164ms fac=   0.42089uF 
+  C=   1.03600uF cpc=   240152.1 cyc=    9 gate= 1248ms fac=   1.01170uF 
+  C=   3.68000uF cpc=   849495.7 cyc=    3 gate= 1715ms fac=   3.58505uF 
+  C=  10.40000uF cpc=  2384609.0 cyc=    1 gate= 2406ms fac=  10.06810uF 
+  fit: cpc = 3286.5 + 229071.6/uF
+       0.0075uF ->    0.0208uF  +176.03%
+       0.4314uF ->    0.4233uF   -1.88%
+       1.0360uF ->    1.0340uF   -0.19%
+       3.6800uF ->    3.6941uF   +0.38%
+      10.4000uF ->   10.3955uF   -0.04%
+== 50 uF
+  C=   0.00000uF cpc=       95.1 cyc=  600 gate=   64ms fac=  -0.02217uF 
+  C=   0.00755uF cpc=     1060.5 cyc=  123 gate=   64ms fac=   0.01771uF 
+  C=   0.04836uF cpc=     5344.3 cyc=   24 gate=   64ms fac=   0.19467uF 
+  C=   0.11440uF cpc=    12622.4 cyc=   10 gate=   64ms fac=   0.49533uF 
+  C=   0.43140uF cpc=    26997.0 cyc=    2 gate=   63ms fac=   1.08915uF (dropped)
+  C=   1.03600uF cpc=    49590.0 cyc=    1 gate=   63ms fac=   2.02247uF (dropped)
+  C=   3.68000uF cpc=    86396.3 cyc=   25 gate= 1190ms fac=   3.54294uF 
+  C=  10.40000uF cpc=   239907.0 cyc=    9 gate= 1345ms fac=   9.88449uF 
+  C=  22.70000uF cpc=   521254.0 cyc=    4 gate= 1435ms fac=  21.50700uF 
+  C=  45.90000uF cpc=  1150197.0 cyc=    2 gate= 1759ms fac=  47.48870uF 
+  fit: cpc = -3551.7 + 24686.6/uF
+       0.0075uF ->    0.1868uF  +2374.54%
+       0.0484uF ->    0.3604uF  +645.15%
+       0.1144uF ->    0.6552uF  +472.71%
+       3.6800uF ->    3.6436uF   -0.99%
+      10.4000uF ->    9.8620uF   -5.17%
+      22.7000uF ->   21.2588uF   -6.35%
+      45.9000uF ->   46.7359uF   +1.82%
+== 500 uF
+  C=   0.00000uF cpc=      102.1 cyc=  537 gate=   63ms fac=  -0.15839uF 
+  C=   0.00755uF cpc=      739.5 cyc=  173 gate=   64ms fac=  -0.10215uF 
+  C=   0.04836uF cpc=     2852.2 cyc=   45 gate=   64ms fac=   0.08427uF 
+  C=   0.11440uF cpc=     6112.1 cyc=   21 gate=   64ms fac=   0.37191uF 
+  C=   0.43140uF cpc=    11516.2 cyc=    5 gate=   63ms fac=   0.84874uF 
+  C=   1.03600uF cpc=    27865.5 cyc=    2 gate=   63ms fac=   2.29133uF (dropped)
+  C=  10.40000uF cpc=   112228.7 cyc=   19 gate= 1190ms fac=   9.73518uF 
+  C=  22.70000uF cpc=   243239.4 cyc=    9 gate= 1352ms fac=  21.29500uF 
+  C=  45.90000uF cpc=   530430.0 cyc=    4 gate= 1345ms fac=  46.63550uF 
+  C=  96.68000uF cpc=  1116194.0 cyc=    2 gate= 1642ms fac=  98.32080uF 
+  C= 263.80000uF cpc=  3335424.0 cyc=    1 gate= 3402ms fac= 294.13600uF 
+  fit: cpc = -17219.0 + 12568.2/uF
+       0.0075uF ->    1.4289uF  +18825.57%
+       0.0484uF ->    1.5970uF  +3202.28%
+       0.1144uF ->    1.8564uF  +1522.69%
+       0.4314uF ->    2.2863uF  +429.98%
+      10.4000uF ->   10.2996uF   -0.97%
+      22.7000uF ->   20.7236uF   -8.71%
+      45.9000uF ->   43.5742uF   -5.07%
+      96.6800uF ->   90.1811uF   -6.72%
+     263.8000uF ->  266.7564uF   +1.12%

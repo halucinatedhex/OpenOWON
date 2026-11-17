@@ -1,0 +1,14 @@
+cap 50 uF: 63ms CTB 0 CTC 0 STA 50 = nan F (factory cal)
+cap 50 uF: 2116ms CTB 2 CTC 2301537 STA 50 = 4.75123e-05 F (factory cal)
+cap 50 uF: 1759ms CTB 2 CTC 2298502 STA 50 = 4.74496e-05 F (factory cal)
+cap 50 uF: 1759ms CTB 2 CTC 2300410 STA 50 = 4.7489e-05 F (factory cal)
+cap 50 uF: 1759ms CTB 2 CTC 2300394 STA 50 = 4.74887e-05 F (factory cal)
+cap 50 uF: 1759ms CTB 2 CTC 2300282 STA 50 = 4.74864e-05 F (factory cal)
+cap 50 uF: mean 4.74852e-05 F over 5, spread 0.132%
+cap 500 uF: 1539ms CTB 4 CTC 2121365 STA 10 (flag missed: counters stopped) = 4.66276e-05 F (factory cal)
+cap 500 uF: 1455ms CTB 4 CTC 2130211 STA 50 = 4.68228e-05 F (factory cal)
+cap 500 uF: 1345ms CTB 4 CTC 2122446 STA 50 = 4.66515e-05 F (factory cal)
+cap 500 uF: 1345ms CTB 4 CTC 2121720 STA 50 = 4.66355e-05 F (factory cal)
+cap 500 uF: 1345ms CTB 4 CTC 2120682 STA 50 = 4.66126e-05 F (factory cal)
+cap 500 uF: 1345ms CTB 4 CTC 2121375 STA 50 = 4.66279e-05 F (factory cal)
+cap 500 uF: mean 4.6663e-05 F over 6, spread 0.45%

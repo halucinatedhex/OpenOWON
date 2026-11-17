@@ -1,0 +1,177 @@
+# Recovered symbols for XDM1041_OS_V2.1.2_20210525.bin  (base 0x08002800)
+# Format:  <address>  <name>  [# comment]
+# These become absolute linker symbols so extension code can call stock functions.
+#
+# !! This image is STM32F103 (v2.x hardware). Addresses will differ on the
+# !! GD32F303 (v3.x) board. Re-derive against your own dump before relying on them.
+
+# --- startup ---
+0x08002900  stock_Reset_Handler        # ldr SystemInit; blx; ldr __main; bx
+0x080029C5  stock_SystemInit           # thumb
+0x080028EC  stock___main               # sets SP, scatterload, jump to rt_entry
+0x080132DC  stock_scatterload
+0x08004645  stock_rt_entry             # thumb
+
+# --- interrupt handlers that are real (not stubs) ---
+0x080049AC  stock_RTC_IRQHandler
+0x080047CE  stock_TIM1_UP_IRQHandler
+0x08004786  stock_TIM3_IRQHandler
+0x0800483A  stock_TIM4_IRQHandler
+0x080047D6  stock_USART1_IRQHandler    # SCPI receive path
+
+# --- SCPI command pipeline ---
+0x08010E1A  stock_scpi_enqueue         # (char *cmd, uint8_t source); len 3..50
+0x080125F4  stock_scpi_service_loop    # polls 10 slots, runs 4-stage pipeline
+0x080110C0  stock_scpi_stage1
+0x080110EA  stock_scpi_stage2
+0x080124A8  stock_scpi_stage3
+0x08012564  stock_scpi_stage4
+0x0801230C  stock_scpi_after_service   # tail-called by the service loop
+
+# --- libc-ish helpers ---
+0x080127C4  stock_strlen
+0x080127EE  stock_strcpy
+0x080130A0  stock_memset_like
+0x08013840  stock_helper_13840
+0x080137CC  stock_helper_137cc
+0x0801255C  stock_helper_1255c
+
+# --- RAM ---
+0x20003C4C  stock_scpi_state           # 10 slots x 53B, +0x4CC widx, +0x4CE rxbuf
+0x20000028  stock_rx_index             # word
+0x20005260  stock_initial_sp
+
+# --- data tables ---
+0x0801E2BC  stock_kw_groups            # flat keyword ptr array, 'end'-terminated
+0x0801E310  stock_kw_func_responses    # "VOLT","CURR AC",...
+0x0801E344  stock_kw_func_inputs       # VOLTage, CURRent, ...
+0x0801EC04  stock_keyword_table        # 56 SCPI keywords, short/long form
+0x0801D794  stock_digit_charset        # "-.0123456789overladOpn "
+
+# --- flash driver (SPL-style) ---
+0x08002C06  stock_FLASH_Unlock
+0x08002C1E  stock_FLASH_Lock
+0x08002C7C  stock_FLASH_ErasePage        # (addr); 2 KB pages
+0x08002DBE  stock_FLASH_ProgramWord      # (addr, word)
+0x08003042  stock_FLASH_ClearFlag
+0x08002F94  stock_FLASH_ProgramOptionByte # OPTKEYR, target 0x1FFFF800
+
+# --- persistence: data log / preferences / factory+calibration (docs/settings-storage.md) ---
+0x08006564  stock_store_write            # (start, end, ram, len): erase pages then program words
+0x08006666  stock_store_read             # (flash, ram, nbytes): word copy
+0x080065E8  stock_store_write_factory    # 0x0803F800-0x08040000, 1392 B, RAM 0x20001A48 (calibration)
+0x080065F4  stock_store_write_log        # 0x0803D800-0x0803F000, 6004 B, RAM 0x20001FB8 (data log)
+0x08006600  stock_store_write_prefs      # 0x0803F000-0x0803F800, 168 B, RAM 0x200019A0
+0x08006540  stock_store_read_prefs
+0x0800654C  stock_store_read_factory
+0x08006558  stock_store_read_log
+0x0800457C  stock_store_load_all         # boot: load 3 records, validate prefs magic 0x55AA1357
+0x08010A02  stock_prefs_defaults         # reset prefs + log count, save
+0x08006474  stock_uart_puts              # USART1 (0x40013800)
+
+# --- RAM mirrors of persisted data ---
+0x200019A0  stock_prefs_ram              # 168 bytes, user preferences
+0x20001A48  stock_factory_ram            # 1392 bytes: coef @+0x1F8, zero @+0x3B0 (docs/calibration.md)
+0x20001FB8  stock_log_ram                # 6004 bytes: count, float[1000], func[1000], range[1000]
+0x2000146E  stock_range_fullscale        # int16 [func][7], .data
+
+# --- SPL GPIO primitives ---
+0x0800311E  stock_GPIO_Init
+0x080031D2  stock_GPIO_ReadInputDataBit
+0x080031E0  stock_GPIO_ReadInputData
+0x080031E6  stock_GPIO_ReadOutputDataBit
+0x080031FA  stock_GPIO_SetBits
+0x080031FE  stock_GPIO_ResetBits
+0x08003202  stock_GPIO_WriteBit
+0x0800320C  stock_GPIO_Write
+
+# --- HY3131 analog front end, bit-banged SPI on GPIOB 12..15 ---
+0x080077C8  stock_hy_write_byte          # MSB-first shift out on PB15, clock PB13
+0x080077B2  stock_hy_set_mosi            # PB15
+0x080077BE  stock_hy_get_miso            # PB14
+0x0800778C  stock_hy_cs                  # PB12
+0x0800777E  stock_hy_clk_low             # PB13
+0x0800780A  stock_hy_read_byte           # 8x: clock PB13, sample PB14, MSB first
+0x0800784A  stock_hy_write_regs          # (idx, buf, n) - idx via table at 0x0801DD5C
+0x0800787C  stock_hy_write_reg1          # (idx, value)
+0x08007888  stock_hy_read_regs           # (idx, buf, n)
+0x0801DD5C  stock_hy_reg_index_table     # logical index -> HY3131 register address
+0x08006704  stock_charset_index          # char -> glyph index; +24 is a 2nd charset
+0x08004E36  stock_keypad_scan            # 2-row scanned matrix -> packed bitmask
+0x08004C94  stock_keypad_row_select      # (row): 1 then 0, drives the two row lines
+
+# --- display: 8-bit parallel (8080) bus, NOT SPI ---
+0x08005E9A  stock_lcd_write_byte         # PA0-7 data, PB10 = WR strobe
+0x08005E52  stock_lcd_dc                 # PB2 = D/C (0 = command, 1 = data)
+0x08005EC2  stock_lcd_cmd                # D/C=0; command via RAM table at 0x2000003A
+0x08005ED6  stock_lcd_data               # D/C=1; one data byte
+0x08005EE8  stock_lcd_set_window         # (x0,x1,y0,y1) via cmds 0x12/0x13/0x14
+0x08005F46  stock_lcd_fill_rect          # (x,y,w,h,rgb565) - the blit primitive
+0x2000003A  stock_lcd_cmd_table          # command index -> controller opcode
+0x08002924  stock_SetSysClock            # HSE -> PLL x6, FLASH latency 2, PPRE1 /2
+0x08005D8C  stock_lcd_gpio_init          # PA0-7 + PB1/PB2/PB10 as Out_PP 50MHz
+0x08005E5C  stock_lcd_reset              # PB1 reset pulse with delays
+0x08006064  stock_lcd_display_on         # idx 0x11/0x10 -> DCS 0x29/0x28
+0x080060C2  stock_lcd_backlight          # level 0/0x19/0x32/0x4B -> table index
+0x08006050  stock_lcd_write16            # one RGB565 pixel, high byte first
+0x0800465C  stock_boot_init              # the main bring-up sequence
+
+# --- measurement path ---
+0x0800889C  stock_ad1_read_scale         # read AD1, convert, scale to float
+0x08012D00  stock_aeabi_i2f
+0x08012D12  stock_aeabi_ui2f
+0x08012D38  stock_aeabi_i2d
+0x08012E2C  stock_aeabi_f2d
+0x08012EB4  stock_aeabi_d2f
+0x08012DBE  stock_aeabi_d2iz
+0x0801292E  stock_aeabi_fdiv
+0x080128CA  stock_aeabi_fmul
+0x080129C2  stock_aeabi_dadd
+0x08012B04  stock_aeabi_dsub
+0x08012B10  stock_aeabi_dmul
+0x08012BF4  stock_aeabi_ddiv
+
+# --- measurement + calibration (docs/calibration.md) ---
+0x08009F3E  stock_meas_dispatch          # switch on function code
+0x08008CCE  stock_meas_dcv               # (func, range): v*coef - zero
+0x08008C50  stock_ad1_read_mag           # 24-bit two's complement, sign out-param
+0x08008C86  stock_hy_data_ready          # HY3131 reg 10 status bits
+0x08008A50  stock_meas_set_function      # (func, range)
+0x0800BB90  stock_cal_screen             # draws 'zero' / 'coef'
+0x0800D83C  stock_log_append
+0x080092AC  stock_meas_dci
+0x080093EA  stock_meas_acv
+0x080094A8  stock_meas_aci
+0x08009108  stock_hy_read_rms_sq         # 38-bit RMS sum from HY3131 0x09-0x0D
+0x08009566  stock_meas_ohm               # (func 4|5, range)
+0x08009E76  stock_meas_continuity
+0x08009DA2  stock_meas_diode
+0x0800971E  stock_meas_cap
+0x08009B4E  stock_meas_freq
+0x080091A0  stock_meas_secondary_freq    # ACV/ACI frequency
+0x08009F22  stock_meas_temp_raw          # DCV 500 mV or ohm 500 ohm
+0x08008DD4  stock_cold_junction          # dV/G - 273.15 - 16
+0x08008EE0  stock_cold_junction_setup    # G from factory +0x56C
+0x0800A1C8  stock_temp_convert           # (sensor, x): K / PT100 table lookup
+0x0800A14E  stock_tc_k_emf               # forward-interpolate K table
+0x0800A048  stock_interp_search          # find i: tbl[i] <= x < tbl[i+1]
+0x08008B5E  stock_meas_filter            # 200-sample buffer, step reset
+0x0800A30A  stock_meas_finalise          # average, temp, REL, dB
+0x0800E1F2  stock_meas_db
+0x08004A4A  stock_delay_busy
+0x080145C4  stock_log10
+0x080146A8  stock_pow                    # inferred
+0x08015080  stock_sqrt
+0x080129AA  stock_ldexpf
+0x08012CD2  stock_ldexp
+0x080128BE  stock_aeabi_fsub
+0x0801281A  stock_aeabi_fadd
+0x08012B0A  stock_aeabi_drsub
+0x08012D5A  stock_aeabi_ui2d
+0x0801DE58  stock_table_type_k_mv         # float[165], -270..1370 C step 10
+0x0801E0EC  stock_table_pt100_ohm         # float[91], -50..850 C step 10 (290 C entry wrong)
+0x0801E298  stock_table_dbm_rref          # uint16[17]
+0x200016B4  stock_cal_mode               # calibration mode active
+0x0800D2FC  stock_log_view_page
+0x20003768  stock_meas_state             # +0x11 function, +0x2B+func range, +0x74 raw AD1, +0x430 reading
+0x08006606  stock_dump_settings_uart     # header 00 08 00 00, 20B tag, 1392B settings, pad 0xFF to 2048
