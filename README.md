@@ -29,6 +29,11 @@ off-state battery drain ([backlog](docs/backlog.md)).
 > calibration is kept. Read [Installing](docs/install.md) before you start.
 
 <p align="center">
+<img src="docs/screens/on-the-meter.gif" width="80%" alt="OpenOWON on an XDM1241: probing a 1.5 kΩ resistor, autoranging from overload to the reading">
+</p>
+<p align="center"><sub>On the meter, real time: leads lifted (overload), then a 1.5 kΩ resistor.</sub></p>
+
+<p align="center">
 <img src="docs/screens/hero-mini-trend.png" width="32%" alt="The reading with its trend underneath, synthwave theme">
 <img src="docs/screens/hero-histogram.png" width="32%" alt="Histogram of a noisy input, paper theme">
 <img src="docs/screens/hero-mini-hist.png" width="32%" alt="The reading with its histogram underneath, amber theme">
@@ -38,7 +43,7 @@ off-state battery drain ([backlog](docs/backlog.md)).
 <img src="docs/screens/themes.gif" width="48%" alt="One live screen in all five themes">
 </p>
 <p align="center"><sub>Live trend and histogram, under the reading or full screen, in five themes.
-Every picture here is the real firmware, running in the
+These screens are the real firmware, running in the
 <a href="docs/app.md">host simulator</a>.</sub></p>
 
 ## Stock vs. OpenOWON
