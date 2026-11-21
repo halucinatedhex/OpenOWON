@@ -28,6 +28,9 @@ lib/ui/stock_fonts.h
 ghidra/proj/
 ghidra/out/
 
+# Raw footage for the highlight reel (scripts/reel.py): too big for git.
+footage/
+
 # Chip dumps: local only in this repo.
 backups/*
 !backups/.gitkeep

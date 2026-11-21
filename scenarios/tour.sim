@@ -47,7 +47,7 @@ shot build/sim-07-diode.bmp
 
 key CAP
 set cap 2.2e-6
-run 2000
+run 4000
 expect reading 2.2000
 shot build/sim-08-cap.bmp
 

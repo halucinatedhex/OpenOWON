@@ -6,7 +6,7 @@
 | --- | --- |
 | [install.md](install.md) | **installing over USB serial**, through OWON's bootloader; why there's very likely no going back |
 | [features.md](features.md) | keys, screens, menus, recording, what the meter remembers |
-| [video-plan.md](video-plan.md) | the highlight reel: beats, captions and the measurement behind each, storyboard, filming |
+| [video-plan.md](video-plan.md) | the highlight reel: beats, captions and the measurement behind each, storyboard, filming; [shot checklist](video/shot-list.md) for the bench session |
 | [scpi.md](scpi.md) | remote-control commands and reply formats |
 | [backlog.md](backlog.md) | what's coming, with feasibility and priority (hardware mods included) |
 

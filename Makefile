@@ -35,16 +35,21 @@ sim: $(FONTS_H)                 ## run the whole meter on the host: scenarios/*.
 # The README's screenshots, from the simulator run (sim-NN -> docs/screens).
 SCREENS = 01-dcv:measure 12-graph:graph 15-record:record 11-stats:stats 14-utility:utility 16-dual:dual \
           30-bargraph-dcv:bargraph 33-autohold:autohold 34-beep-settings:beeper \
-          35-browse-recording:log-browse 36-histogram:histogram 10-thermocouple:thermocouple \
+          35-browse-recording:log-browse 10-thermocouple:thermocouple \
           reel-04-diode-led:diode reel-13-theme-dark:theme-dark reel-14-theme-amber:theme-amber \
           reel-15-theme-paper:theme-paper reel-15s-theme-synthwave:theme-synthwave reel-16-theme-stock:theme-stock \
-          reel-17-mini-trend:mini-trend reel-18-mini-hist:mini-hist 39-power:power
-screens: sim                    ## refresh docs/screens/*.png (the README's pictures) from the simulator
+          reel-17-mini-trend:mini-trend 39-power:power
+# histogram, mini-hist, the hero-* shots and the GIFs come from scripts/readme-media.py.
+screens: sim                    ## refresh docs/screens/ (the README's pictures and GIFs) from the simulator
 	@for s in $(SCREENS); do cp "build/sim-$${s%%:*}.png" "docs/screens/$${s##*:}.png"; done
 	@echo "docs/screens/ refreshed: $(foreach s,$(SCREENS),$(lastword $(subst :, ,$(s))))"
+	@python3 scripts/readme-media.py
 
 storyboard: sim                 ## the highlight reel's storyboard and 9:16 frame guide (docs/video/)
 	@python3 scripts/storyboard.py
+
+reel: sim                       ## render the highlight reel from docs/video/edit.toml and footage/ (stand-ins where unfilmed; needs ffmpeg)
+	@python3 scripts/reel.py
 
 test: $(FONTS_H)                ## host unit tests, no hardware
 	pio test -e native
@@ -86,4 +91,4 @@ probe:               ## identify probe + target, show backup status
 clean:               ## remove build artefacts
 	rm -rf build .pio
 
-.PHONY: help ui sim screens storyboard test test-scripts portable fw-all check fw triage probe clean
+.PHONY: help ui sim screens storyboard reel test test-scripts portable fw-all check fw triage probe clean

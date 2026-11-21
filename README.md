@@ -28,11 +28,18 @@ off-state battery drain ([backlog](docs/backlog.md)).
 > readout-protected, so stock can't be backed up first. Your factory
 > calibration is kept. Read [Installing](docs/install.md) before you start.
 
-<p>
-<img src="docs/screens/measure.png" width="32%" alt="Measurement screen">
-<img src="docs/screens/graph.png" width="32%" alt="Trend graph">
-<img src="docs/screens/power.png" width="32%" alt="Power and energy">
+<p align="center">
+<img src="docs/screens/hero-mini-trend.png" width="32%" alt="The reading with its trend underneath, synthwave theme">
+<img src="docs/screens/hero-histogram.png" width="32%" alt="Histogram of a noisy input, paper theme">
+<img src="docs/screens/hero-mini-hist.png" width="32%" alt="The reading with its histogram underneath, amber theme">
 </p>
+<p align="center">
+<img src="docs/screens/graph.gif" width="48%" alt="The trend graph drawing a live input">
+<img src="docs/screens/themes.gif" width="48%" alt="One live screen in all five themes">
+</p>
+<p align="center"><sub>Live trend and histogram, under the reading or full screen, in five themes.
+Every picture here is the real firmware, running in the
+<a href="docs/app.md">host simulator</a>.</sub></p>
 
 ## Stock vs. OpenOWON
 
@@ -43,8 +50,8 @@ off-state battery drain ([backlog](docs/backlog.md)).
 | **Display response** | ~4 s to settle | **instant** | • a big change shows within one conversion<br>• noise near a range boundary doesn't make the range flap |
 | **Settings at power-on** | partly forgotten | **all kept** | • function, speed and every menu setting<br>• stored power-cut-safe: a cut mid-save keeps the old or the new value |
 | **Data log** | 1,000 points | **10,668 points** | • survives power cuts<br>• fast mode: every 15 ms (DC V, DC I, ohms), like stock's internal recorder<br>• rolling (overwrite the oldest) or stop when full<br>• browse on screen with a cursor<br>• download with `LOG:DATA?`, or in stock's own format (`INT:RECord?`)<br><img src="docs/screens/log-browse.png" width="240" alt="log-browse"> |
-| **Trend graph** | ✗ | ✓ | • 51 s, 4 min or 26 min<br>• auto or full-scale axis, pause<br><img src="docs/screens/graph.png" width="240" alt="graph"> |
-| **Histogram** | ✗ | ✓ | • the spread of readings, from the graph screen<br><img src="docs/screens/histogram.png" width="240" alt="histogram"> |
+| **Trend graph** | ✗ | ✓ | • 51 s, 4 min or 26 min<br>• auto or full-scale axis, pause<br><img src="docs/screens/graph.gif" width="240" alt="graph"> |
+| **Histogram** | ✗ | ✓ | • the spread of readings, from the graph screen<br>• mean and standard deviation<br><img src="docs/screens/histogram.png" width="240" alt="histogram"> |
 | **Mini graph under the reading** | ✗ | ✓ | • the trend, or its histogram, drawn under the big digits<br>• the number stays big; the history is visible at the same time<br><img src="docs/screens/mini-trend.png" width="240" alt="mini trend"> <img src="docs/screens/mini-hist.png" width="240" alt="mini histogram"> |
 | **Bar graph** | ✗ | ✓ | • under the reading, zero in the middle for DC and REL<br><img src="docs/screens/bargraph.png" width="240" alt="bargraph"> |
 | **Clock and timestamps** | ✗ | ✓ | • a real-time clock on its backup cell, set over SCPI<br>• each recording keeps its start time; the browse cursor shows clock time |
@@ -67,6 +74,27 @@ off-state battery drain ([backlog](docs/backlog.md)).
 Stock behaviour was measured on our V4.3.0 meter or reported on the
 [EEVblog XDM1041 thread](https://www.eevblog.com/forum/testgear/owon-xdm1041-the-unknown-multimeter/)
 ([summary](docs/community-research.md)).
+
+## How it was done
+
+- **Stock's settings recovered by emulation.** No schematic and no
+  working stock meter to probe: OWON's v2.1.2 firmware runs in an emulator
+  and reports every front-end register and relay setting it would use for
+  each range. Each one is then checked on the meter against reference parts.
+- **The whole meter runs on a laptop.** A bit-level model of the front-end
+  chip, the panel and the flash lets the real firmware be tested end to
+  end, including power cuts at every flash write, before it goes on the
+  meter.
+- **Fast autoranging:** quick, low-resolution conversions find the range,
+  then one full-resolution reading is taken there, jumping straight to
+  the right range instead of stepping one at a time.
+- **A 300 KB screen from 48 KB of RAM:** each frame is drawn in strips,
+  and only the rows that changed are sent to the panel.
+- **Volts and amps at once from one ADC:** power mode alternates the chip
+  between two settings that need no relay to move, and corrects a leak
+  found in the volts input.
+- **Installed through OWON's own bootloader**, using the protocol the
+  community worked out. The calibration area is never sent.
 
 ## Using it
 

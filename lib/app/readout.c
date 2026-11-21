@@ -36,6 +36,11 @@ double readout_limit(meas_fn_t fn, int range)
     return fs * 1.1;
 }
 
+/* B60: going down onto 5 uF or 50 uF only well inside them (30%): their
+ * charge cycles are seconds long near full scale, and the range above
+ * reads such a part with the same digits. 90% elsewhere. */
+static double cap_down_frac(int r) { return r == 2 || r == 3 ? 0.3 : 0.9; }
+
 bool readout_overload(meas_fn_t fn, int range, double si)
 {
     return isnan(si) || fabs(si) > readout_limit(fn, range);
@@ -70,10 +75,18 @@ int readout_autorange(meas_fn_t fn, int range, double si, bool overload)
     int bottom, top;
     readout_range_span(fn, range, &bottom, &top);
     double v = fabs(si);
-    if (fn == MEAS_CAP) {                        /* one step at a time */
-        if (overload || v > fs_si(fn, range)) return range < top ? range + 1 : range;
-        if (range > bottom && v < 0.9 * fs_si(fn, range - 1)) return range - 1;
-        return range;
+    if (fn == MEAS_CAP) {
+        /* An overload has no value: one range up, not to the top (the top
+         * ranges take seconds a reading). A value goes straight to its
+         * range (B60): the smallest that holds it, or that holds it under
+         * 90% going down. */
+        if (overload) return range < top ? range + 1 : range;
+        int r = range;
+        if (v > fs_si(fn, range))
+            while (r < top && v > fs_si(fn, r)) r++;
+        else if (range > bottom && v < 0.9 * fs_si(fn, range - 1))
+            for (r = bottom; r < range && v >= cap_down_frac(r) * fs_si(fn, r); r++) {}
+        return r;
     }
     if (overload) return top;
     /* Up one past 105%: readings show to 110% (the manual's over-range), and

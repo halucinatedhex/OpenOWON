@@ -75,8 +75,14 @@ charge slope: the meter rests the capacitor, charges it at a constant
 current for 2-3 s, reads it every 246 ms and fits a line to the rise. A
 reading takes about 1.3 s on the counter ranges (longer for large values:
 one charge cycle of a 260 µF part is ~3 s), 3 s on 5 mF and 5.5 s on
-50 mF. Autoranging steps one range at a time, so a large capacitor takes a
-few readings to arrive (about 19 s from 5 µF to 5 mF). On our meter a
+50 mF. Autoranging goes straight to the range a reading says. Large
+capacitors are still slow to arrive, because the hardware is: on the
+500 µF range one charge cycle takes ~21 ms per µF, and a part too big for
+a range gives nothing until a cycle ends. On our meter, from selecting CAP: about
+3-4 s for nF parts (simulator), 12 s for 100 µF and 15 s for 1000 µF
+(stock-like ranging took 14.5 s and 22 s); once on the right range, a new
+reading every ~2 s (100 µF) or ~3 s (1000 µF). UP/DOWN to the right range
+is quicker if you know it. On our meter a
 1000 µF electrolytic reads 1.085 mF, steady to ±0.3% over 17 readings, and
 an 18 mF one 17.64 mF, ±0.45% over 28 readings (drifting up 1% over the
 first minute and a half, as electrolytics do under repeated charging). Checked against

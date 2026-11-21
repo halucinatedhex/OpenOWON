@@ -1,0 +1,150 @@
+# The highlight reel's edit list: `python3 scripts/reel.py` renders it to
+# build/reel/reel.mp4 (1080x1920, 30 fps). One [[beat]] per beat of
+# docs/video-plan.md, in order; captions must match the plan's.
+#
+# Per beat:
+#   caption   burned in above the screen ("\n" breaks a line)
+#   seconds   its length when the clip is missing (a simulator still stands in)
+#   still     the stand-in still in build/ (without .png); none = a title card
+#   music     false keeps the music out (the beeps are the sound); default true
+#   [[beat.part]]  one or more clips, played in turn under the one caption:
+#     clip    file in the footage folder (--footage, default footage/)
+#     in, out seconds into the clip (out defaults to in + seconds)
+#     slow    1 = real time; 8 = 8x slow motion (a 240 fps clip played at
+#             30 fps; out - in is then 1/8 of the beat's length)
+#     audio   false mutes the clip (slowed clips are muted unless true)
+#     zoom    1 = fill the frame; 1.3 crops in further
+#     focus   [x, y], 0-1: where the crop sits when zoomed (default centre)
+#
+# `python3 scripts/reel.py beeps <clip>` lists a clip's beeps, to place
+# in/out on beats 1-5.
+
+[[beat]]
+caption = "Stock: 9 s to settle.\nMine: watch."
+seconds = 4
+still = "sim-reel-01-ohms"
+music = false
+  [[beat.part]]
+  clip = "b01-ohms.mov"
+  in = 0.0
+  slow = 1
+
+[[beat]]
+caption = "Instant continuity"
+seconds = 3
+still = "sim-reel-02-continuity"
+music = false
+  [[beat.part]]
+  clip = "b02-continuity.mov"
+  in = 0.0
+
+[[beat]]
+caption = "Pick your beep"
+seconds = 5
+still = "sim-reel-03-beep-style"
+music = false
+  [[beat.part]]
+  clip = "b03-beep-style.mov"
+  in = 0.0
+
+[[beat]]
+caption = "One beep per junction"
+seconds = 3
+still = "sim-reel-04-diode-led"
+  [[beat.part]]
+  clip = "b04-diode.mov"
+  in = 0.0
+
+[[beat]]
+caption = "Probe. Beep. Lift. Read."
+seconds = 4
+still = "sim-reel-05-autohold"
+  [[beat.part]]
+  clip = "b05-autohold.mov"
+  in = 0.0
+
+[[beat]]
+caption = "History under the digits"
+seconds = 4
+still = "sim-reel-17-mini-trend"
+  [[beat.part]]
+  clip = "b06-mini-trend.mov"
+  in = 0.0
+
+[[beat]]
+caption = "Live trend graph"
+seconds = 4
+still = "sim-reel-07-graph"
+  [[beat.part]]
+  clip = "b07-graph.mov"
+  in = 0.0
+
+[[beat]]
+caption = "Watts, Wh and mAh\nwhile it charges"
+seconds = 5
+still = "sim-reel-19-power"
+  [[beat.part]]
+  clip = "b08-power.mov"
+  in = 0.0
+
+[[beat]]
+caption = "AC volts + Hz"
+seconds = 3
+still = "sim-reel-08-dual"
+  [[beat.part]]
+  clip = "b09-acv-freq.mov"
+  in = 0.0
+
+[[beat]]
+caption = "10,668 points\nevery 15 ms"
+seconds = 4
+still = "sim-reel-10-recording"
+  [[beat.part]]
+  clip = "b10-recording.mov"
+  in = 0.0
+
+[[beat]]
+caption = "Five themes"
+seconds = 4
+still = "sim-reel-15s-theme-synthwave"
+  [[beat.part]]
+  clip = "b11-themes.mov"
+  in = 0.0
+  out = 0.8
+  still = "sim-reel-16-theme-stock"
+  [[beat.part]]
+  clip = "b11-themes.mov"
+  in = 2.0
+  out = 2.8
+  still = "sim-reel-13-theme-dark"
+  [[beat.part]]
+  clip = "b11-themes.mov"
+  in = 4.0
+  out = 4.8
+  still = "sim-reel-14-theme-amber"
+  [[beat.part]]
+  clip = "b11-themes.mov"
+  in = 6.0
+  out = 6.8
+  still = "sim-reel-15-theme-paper"
+  [[beat.part]]
+  clip = "b11-themes.mov"
+  in = 8.0
+  out = 8.8
+  still = "sim-reel-15s-theme-synthwave"
+
+[[beat]]
+caption = "Installs over USB.\nNo screwdriver."
+seconds = 4
+still = "none"
+  [[beat.part]]
+  clip = "b12-install.mov"
+  in = 0.0
+
+[[beat]]
+caption = "OpenOWON\nfor the XDM1241"
+seconds = 5
+still = "sim-reel-20-power-synthwave"
+  [[beat.part]]
+  clip = "b13-end-card.mov"
+  in = 0.0

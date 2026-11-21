@@ -83,6 +83,7 @@ static void restart(app_t *a)
     a->acq.rtd_lead_ohm = a->rtd_lead_mohm / 1000.0;
     set_hunting(a, false);               /* a ranging restart sets it again */
     a->low_run = 0;
+    a->acq.ct_short = a->autorange && a->fn == MEAS_CAP;   /* B60: range_step refines it */
     a->dirty = true;
 }
 
@@ -665,6 +666,9 @@ static void range_step(app_t *a, int nr)
     restart(a);
     set_hunting(a, true);
     a->hunt_from = (int8_t)from;
+    /* B60: short over-range timeouts only when climbing; a range a reading
+     * sent us down to gets the full ones. */
+    a->acq.ct_short = nr > from;
 }
 
 /* ---- B32: calibration page ------------------------------------------------ */
@@ -745,6 +749,8 @@ static bool range_on_sample(app_t *a, const acq_sample_t *s)
      * sent the hunt to 5 kohm). Go back up one range, not to the top: the
      * top range is the slowest to settle. A real overload still climbs. */
     if (over && a->hunting && a->hunt_from > r) nr = avail(a, a->fn, r + 1);
+    /* 0 on 5 / 50 mF is "clipped", not a value: one range down, no jump. */
+    if (acq_cap_slope(a->fn, r) && s->value == 0.0 && !over) nr = avail(a, a->fn, r - 1);
     bool low = nr < r && fabs(s->value) < 0.8 * readout_fullscale(a->fn, r - 1);
     a->low_run = low ? (uint8_t)(a->low_run < 255 ? a->low_run + 1 : 255) : 0;
     /* 5 / 50 mF: a reading takes 3-5.5 s, and 0 means the capacitor clipped
@@ -801,8 +807,21 @@ static void cal_job_sample(app_t *a, const acq_sample_t *s)
     app_sound(a, r ? SND_ALARM : SND_HOLD);
 }
 
+/* B60: a capacitance reading the front end marks as settling (the first
+ * gates after a change) is not shown, but one clearly out of this range
+ * moves the range now rather than after the discards. */
+static void settling_sample(app_t *a, const acq_sample_t *s)
+{
+    if (!a->autorange || !readout_autoranges(a->fn)) return;
+    int r = a->range[a->fn];
+    if (s->overrange || readout_overload(a->fn, r, s->value)) return;
+    int nr = avail(a, a->fn, readout_autorange(a->fn, r, s->value, false));
+    if (nr != r) range_step(a, nr);
+}
+
 static void sample(app_t *a, const acq_sample_t *s)
 {
+    if (s->settling) { settling_sample(a, s); return; }
     a->samples++;
     cal_job_sample(a, s);
     if (s->secondary && a->power) { power_volts(a, s); return; }   /* B21 */

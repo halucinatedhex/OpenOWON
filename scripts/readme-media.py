@@ -1,0 +1,151 @@
+#!/usr/bin/env python3
+"""The README's hero pictures and animations, from the meter simulator.
+
+Writes a scenario to build/readme.sim, runs it through build/meter-sim (the
+real application on the host, `make -C tools sim`), and turns the shots into:
+
+  docs/screens/hero-mini-trend.png   synthwave, trend under the big reading
+  docs/screens/hero-histogram.png    paper, the full histogram of a noisy input
+  docs/screens/hero-mini-hist.png    amber, histogram under the big reading
+  docs/screens/histogram.png         dark, the same histogram (feature table)
+  docs/screens/mini-hist.png         dark, the same mini histogram (feature table)
+  docs/screens/graph.gif             the trend graph drawing a slow sine
+  docs/screens/themes.gif            one live screen through all five themes
+
+Every frame is a simulator screenshot; nothing is drawn by this script.
+Run by `make screens`; needs Pillow.
+"""
+import math
+import os
+import subprocess
+import sys
+
+from PIL import Image
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BUILD = os.path.join(ROOT, "build")
+OUT = os.path.join(ROOT, "docs", "screens")
+SIM = os.path.join(BUILD, "meter-sim")
+
+THEMES = ["stock", "dark", "amber", "paper", "synthwave"]   # the THEME menu's order
+
+
+class Scenario:
+    def __init__(self):
+        self.lines = []
+        self.t = 0.0            # simulated seconds, for the waveform
+        self.theme = "stock"    # the power-on theme
+        self.shots = {}
+
+    def __call__(self, *lines):
+        for line in lines:          # each key gets time to land on the simulated keypad
+            self.lines.append(line)
+            if line.startswith("key "):
+                self.run(120)
+
+    def run(self, ms):
+        self(f"run {ms}")
+        self.t += ms / 1000.0
+
+    def set_theme(self, name):
+        steps = (THEMES.index(name) - THEMES.index(self.theme)) % len(THEMES)
+        if not steps:
+            return
+        self("menu THEME", *["key RIGHT"] * steps)
+        self.run(200)
+        self(f"expect menu {name}", "key UTILITY")
+        self.run(200)
+        self.theme = name
+
+    def shot(self, name):
+        path = os.path.join(BUILD, f"readme-{name}.bmp")
+        self(f"shot {path}")
+        self.shots[name] = path
+        return path
+
+    def sine(self, ms, frames=None, prefix=None, step=100, mid=2.5, amp=1.6, period=20.0):
+        """Drive a slow sine for ms; optionally a shot every `frames` ms."""
+        out, since = [], 0
+        for _ in range(ms // step):
+            self(f"set dcv {mid + amp * math.sin(2 * math.pi * self.t / period):.5f}")
+            self.run(step)
+            since += step
+            if frames and since >= frames:
+                since = 0
+                out.append(self.shot(f"{prefix}-{len(out):03d}"))
+        return out
+
+
+def build():
+    s = Scenario()
+    s("send CONF:VOLT:DC")
+    s.run(100)
+
+    # A steady 2.5 V with Gaussian noise fills the histograms. CLEAR (F4)
+    # after it settles, so the buffer holds noise only.
+    s("set dcv 2.5", "set noise 1500")
+    s.run(3000)
+    s("key F3", "key F3", "expect key3 NUM+H", "key F4")       # NUM+H
+    s.run(60000)
+    s.set_theme("amber")
+    s.shot("hero-mini-hist")
+    s.set_theme("dark")
+    s.shot("mini-hist")
+    s("key F3", "key F3", "expect key3 HISTO")                  # GRAPH -> HISTO
+    s.run(300)
+    s.shot("histogram")
+    s.set_theme("paper")
+    s.shot("hero-histogram")
+
+    # A slow sine on the trend graph: one frame a second while it draws.
+    s("key F3", "expect key3 NUM", "set noise 150")             # back to NUM
+    s.set_theme("dark")
+    s("key F3", "key F3", "key F3", "expect key3 GRAPH", "key F4")
+    graph = s.sine(64000, frames=1000, prefix="graph")
+
+    # The mini trend under the big reading, then a theme tour of that screen.
+    s("key F3", "key F3", "expect key3 NUM", "key F3", "expect key3 NUM+G", "key F4")
+    s.sine(52000)
+    s.set_theme("synthwave")
+    s.shot("hero-mini-trend")
+    tour = []
+    for name in ["stock", "dark", "amber", "paper", "synthwave"]:
+        s.set_theme(name)
+        s.sine(600)
+        tour.append(s.shot(f"theme-{name}-live"))
+    return s, graph, tour
+
+
+def load(path):
+    return Image.open(path).convert("RGB")
+
+
+def gif(frames, path, ms, hold_last=0):
+    imgs = [load(f) for f in frames]
+    durs = [ms] * len(imgs)
+    if hold_last:
+        durs[-1] = hold_last
+    pal = [im.quantize(colors=128, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE) for im in imgs]
+    pal[0].save(path, save_all=True, append_images=pal[1:], duration=durs, loop=0, optimize=True, disposal=1)
+    print(f"  {os.path.relpath(path, ROOT)}  {len(imgs)} frames, {os.path.getsize(path) // 1024} KB")
+
+
+def main():
+    if not os.path.exists(SIM):
+        sys.exit("build/meter-sim missing: run `make -C tools sim` (or `make sim`) first")
+    s, graph, tour = build()
+    sim = os.path.join(BUILD, "readme.sim")
+    with open(sim, "w") as f:
+        f.write("# Generated by scripts/readme-media.py: the README's hero shots and GIFs.\n")
+        f.write("\n".join(s.lines) + "\n")
+    subprocess.run([SIM, sim], check=True, stdout=subprocess.DEVNULL)
+
+    for name in ["hero-mini-trend", "hero-histogram", "hero-mini-hist", "histogram", "mini-hist"]:
+        load(s.shots[name]).save(os.path.join(OUT, f"{name}.png"), optimize=True)
+        print(f"  docs/screens/{name}.png")
+    gif(graph, os.path.join(OUT, "graph.gif"), 110, hold_last=1500)
+    gif(tour, os.path.join(OUT, "themes.gif"), 1400)
+
+
+if __name__ == "__main__":
+    main()

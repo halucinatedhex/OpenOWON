@@ -31,6 +31,12 @@ static double ohm_settle_tau_ms(int range)
 }
 #define AD2_PERIOD_MS 100u
 #define CT_PERIOD_MS  500u
+#define CT_CAP_GATE_MS 1070u        /* (0x1000000 - 0xBF0000) / 4 MHz */
+/* One charge cycle, ms per uF, by range (on our meter, 2026-11-19: 100 uF
+ * on 500 uF gives a reading every 2.14 s, and stays over range on 50 uF;
+ * the ranges below scale by stock's divisors, 3.25x and 10x). A part far
+ * over the range gives no reading for many seconds. */
+static const double ct_cap_ms_per_uf[5] = { 875.0, 875.0, 700.0, 70.0, 21.5 };
 #define CT_REF       2000000.0      /* CTA + 2^20: a 0.5 s gate at 4 MHz */
 
 /* ---- state ------------------------------------------------------------- */
@@ -43,9 +49,10 @@ static int         cfg_range = 2;
 static afe_aux_t   cfg_aux = AFE_AUX_NONE;
 static uint32_t    t_ms;
 static double      cj_g = 0.169465;
-static uint32_t    rng = 12345u;
+static uint64_t    rng = 12345u;
 static uint32_t    ntrans;
 static bool        ct_running;      /* counters counting (ENCTR on, gate not over) */
+static uint32_t    ct_start;        /* t_ms when ENCTR went on */
 static double      cap_v = 0.097;   /* charge-slope ranges: the capacitor, in meas_cap_volts() units */
 static unsigned    rate_shift;      /* SPEED: 0 LOW, 1 MID, 2 HIGH: the period halves each step */
 
@@ -77,6 +84,7 @@ static void reg_write(uint8_t r, uint8_t v)
             ct_running = false;
         } else {
             ct_running = true;
+            ct_start = t_ms;
         }
     }
 }
@@ -143,11 +151,21 @@ const hy3131_io_t sim_hy3131_io = {
 
 /* ---- analog model ------------------------------------------------------------ */
 
+/* splitmix64: uniform in (0, 1). Box-Muller needs independent pairs; a
+ * 32-bit LCG's consecutive outputs fall on a lattice, which made the noise's
+ * histogram come out lumpy and the same shape whatever the level. */
+static double uniform(void)
+{
+    uint64_t z = (rng += 0x9E3779B97F4A7C15ull);
+    z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ull;
+    z = (z ^ (z >> 27)) * 0x94D049BB133111EBull;
+    z ^= z >> 31;
+    return ((z >> 11) + 0.5) / 9007199254740992.0;
+}
+
 static double gauss(void)
 {
-    double u1, u2;
-    rng = rng * 1664525u + 1013904223u; u1 = ((rng >> 8) + 1.0) / 16777217.0;
-    rng = rng * 1664525u + 1013904223u; u2 = ((rng >> 8) + 1.0) / 16777217.0;
+    double u1 = uniform(), u2 = uniform();
     return sqrt(-2.0 * log(u1)) * cos(6.283185307179586 * u2);
 }
 
@@ -316,11 +334,13 @@ void sim_hy3131_tick_ms(void)
                           (uint32_t)regs[HY_CTA + 2] << 16) + 4000u;
             put24(HY_CTA, a & 0xFFFFFFu);
         }
-        /* As on the meter (2026-11-15): a capacitor far above the range
-         * never ends a charge cycle, so no result at all. */
-        bool stuck = cfg_fn == MEAS_CAP &&
-                     world.cap > 10.0 * meas_to_si(MEAS_CAP, cfg_range, meas_fullscale(MEAS_CAP, cfg_range));
-        if (t_ms % CT_PERIOD_MS == 0 && !stuck) produce_counters();
+        if (cfg_fn == MEAS_CAP) {
+            /* The gate, run on to the end of a cycle; the restart comes at a
+             * cycle's end, so a reading is a whole number of cycles. */
+            double cyc = world.cap * 1e6 * ct_cap_ms_per_uf[cfg_range < 5 ? cfg_range : 4];
+            double done = cyc > 1.0 ? ceil(CT_CAP_GATE_MS / cyc) * cyc : CT_CAP_GATE_MS;
+            if (ct_running && (double)(t_ms - ct_start) >= done) produce_counters();
+        } else if (t_ms % CT_PERIOD_MS == 0) produce_counters();
     }
     else {
         bool fast = cfg_aux == AFE_AUX_FAST || cfg_fn == MEAS_CONT || cfg_fn == MEAS_DIODE;
@@ -339,6 +359,7 @@ void sim_hy3131_configure(meas_fn_t fn, int range, afe_aux_t aux)
 {
     cfg_fn = fn; cfg_range = range; cfg_aux = aux;
     t_ms = 0;
+    ct_start = 0;
     regs[HY_INTF] = 0;
 }
 

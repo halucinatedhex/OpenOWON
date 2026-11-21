@@ -25,6 +25,8 @@ our meter**, so the video can be checked against the repo.
 
 <img src="video/frame-guide.png" width="270" alt="9:16 frame guide">
 
+Editing: [below](#editing).
+
 ## The beats
 
 | # | s | Film | Meter setup | Caption | The claim, and where it's proven |
@@ -36,7 +38,7 @@ our meter**, so the video can be checked against the repo.
 | 5 | 15–19 | Probe a 9 V battery, beep, lift: the reading stays | RUN/STOP twice (auto-hold) | "Probe. Beep. Lift. Read." | `features.md` |
 | 6 | 19–23 | Turn a pot slowly: the trend draws under the big digits | DCV, VIEW → NUM+G | "History under the digits" | |
 | 7 | 23–27 | The full trend graph, then the histogram | VIEW → GRAPH → HISTO | "Live trend graph" | |
-| 8 | 27–32 | **A Li-ion cell charging**: watts big, Wh / mAh / time ticking | DC current on the **A** jack (F5), DUAL → F3 POWER; volts lead on cell + | "Watts, Wh and mAh while it charges" | on our meter 2026-11-16: 0.4186 W at 5 V, current within 0.01 mA of plain DC current (`test-plan.md`, evening). **Use the A jack** |
+| 8 | 27–32 | **A Li-ion cell charging**: watts big, Wh / mAh / time ticking | DC current on the **A** jack (F5), DUAL → F3 POWER; low side: supply − to COM, A jack to cell −, cell + to supply +, volts lead on cell + | "Watts, Wh and mAh while it charges" | on our meter 2026-11-16: 0.4186 W at 5 V, current within 0.01 mA of plain DC current (`test-plan.md`, evening). **Use the A jack** |
 | 9 | 32–35 | The transformer: AC volts with its frequency | ACV, DUAL → F1 FREQ | "AC volts + Hz" | AC volts within 0.25% between ranges at 60 Hz, frequency to ~0.01% (`results/acv-freq-20261113.md`) |
 | 10 | 35–39 | RECORD on, the trace fills; then browse with the cursor | DCV, RECORD: interval **15 ms**, F1 | "10,668 points, every 15 ms" | 574 readings in ~10 s at 15 ms (`test-plan.md`, 2026-11-16); stock 1,000 points |
 | 11 | 39–43 | **Themes on the beat**: stock, dark, amber, paper, synthwave, a jump cut each | UTILITY → THEME | "Five themes" | |
@@ -45,16 +47,36 @@ our meter**, so the video can be checked against the repo.
 
 Spares if a beat doesn't land: SPEED high, 16 readings a second
 (16.2 / s measured, stock 1–3 / s); the bar graph; statistics with REL;
-capacitance up to 50 mF (18 mF read 17.64 mF).
+capacitance up to 50 mF (18 mF read 17.64 mF); AC current to 10 A (5 A and
+10 A within 0.5% at 1.8 A).
 
 ## What to have on the bench
 
 10 kΩ resistor · an LED · 9 V battery · a pot across a supply or battery
 (beats 6, 7, 10) · the 9 VAC transformer · a Li-ion cell on a charger or
-supply (beat 8: the charge current through the A jack, COM to cell −, the
-volts lead on cell +) · the laptop on the meter's USB.
+supply (beat 8, wired low side: supply − to COM, the A jack to cell −,
+cell + to supply +, the volts lead on cell +) · the laptop on the meter's USB.
 
 ## Filming
+
+**The bench session, step by step: [shot checklist](video/shot-list.md)**
+(in filming order, grouped by setup, with what to check before moving on).
+
+## Editing
+
+The cut is a text file, [`video/edit.toml`](video/edit.toml): one entry per
+beat with its caption, clip, in and out points, slow motion and zoom.
+`make reel` (or `python3 scripts/reel.py --music track.m4a`) renders it to
+`build/reel/reel.mp4`: 1080 × 1920, 30 fps, captions burned in where the
+frame guide puts them, music under everything but beats 1–3.
+
+1. Copy the clips into `footage/` (not committed), named as in `edit.toml`
+   (`b01-ohms.mov`, …). Beats not filmed yet render as their simulator
+   still, so the reel always plays end to end.
+2. `python3 scripts/reel.py beeps footage/b02-continuity.mov` lists a clip's
+   beeps and suggests in/out points to paste into `edit.toml` (beats 1–5).
+3. Set the rest by watching the clips; re-render (about 10 s) and adjust.
+4. Optional: music, or a trending sound, in CapCut before posting.
 
 - Phone on a stand above the meter, tilted ~15° against glare.
 - Lock focus and exposure on the screen; shutter 1/50 or 1/60 s so the
@@ -67,7 +89,7 @@ volts lead on cell +) · the laptop on the meter's USB.
 ## Before posting
 
 - **No link in the video or bio until the public repo is up**: a squashed
-  export without `backups/` (OWON's code and our meter's serial), GPL-3.0.
+  export without `backups/` or `firmware/*.bin` (OWON's code and our meter's serial), GPL-3.0.
   Read the README's install warning again before it goes out.
 - Captions must stay true: if a beat is re-shot with a different part,
   re-check its number against the column above.

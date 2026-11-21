@@ -211,7 +211,7 @@ Stock is reported slow everywhere (`community-research.md`). Ours
 | While ranging | every sample decides; the first sample that holds is shown at once, not at the next 200 ms tick |
 | Steady state | only clear cases act at once: an overload, or **two** samples in a row below 80% of the next range down. Everything else waits for the averaged update |
 | A step bigger than 10% of full scale within a range | shown at once (the filter restarts on it, as stock's does) |
-| Capacitance | one range at a time, since its high ranges are slow to measure |
+| Capacitance (B60) | a reading goes straight to the range that holds it (down onto 5 µF or 50 µF only below 30% of them: their cycles are seconds long); an overload goes up one. The first gate after a change is ranged on, not shown; while climbing, a range calls over range after 2-6 s instead of 4-9 s. A reading is the 1.07 s gate plus up to one charge cycle, ~21 ms per µF on 500 µF: that, not the firmware, sets how fast big parts arrive |
 
 **Measured in the simulator** (`test/test_ranging`). Each step is repeated at
 12 phases of the sample and display cycles. Since 2026-11-14 the simulator

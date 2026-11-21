@@ -153,8 +153,8 @@ run 300
 # 11. Capacitance on a 47 uF part.
 key CAP
 set cap 47.1e-6
-run 8000
-expect reading 47.100
+run 14000
+expect reading 47.10
 shot build/sim-reel-11-cap.bmp
 
 # 12. The Utility menu.

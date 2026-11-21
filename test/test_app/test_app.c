@@ -256,7 +256,7 @@ static void test_capacitance_and_frequency(void)
 {
     app_key(&app, KEY_CAP);
     w->cap = 1e-6;
-    sim_board_run(&app, 2000);
+    sim_board_run(&app, 4000);                   /* ~1.1 s gates, as the meter */
     READS("1.0000");
     TEST_ASSERT_EQUAL_STRING("uF", app.view.unit);
 
@@ -304,6 +304,40 @@ static void test_capacitance_charge_slope(void)
     sim_board_run(&app, 60000);                                   /* from a capacitor left high */
     TEST_ASSERT_EQUAL_INT(6, app.range[MEAS_CAP]);
     TEST_ASSERT_TRUE(app.overload);
+}
+
+/* Fast capacitance autoranging (B60): from CAP selected with the part
+ * already on the leads, how long until a reading on the right range is
+ * shown. Each case from a fresh meter (start range 5 uF). */
+static uint32_t cap_settle_ms(double c, int want, double tol)
+{
+    setUp();
+    w->cap = c;
+    app_key(&app, KEY_CAP);
+    for (uint32_t t = 0; t <= 60000; t += 50) {
+        double v;
+        if (app.range[MEAS_CAP] == want && !app.hunting && app_measurement(&app, &v)
+            && fabs(v - c) <= tol * c)
+            return t;
+        sim_board_run(&app, 50);
+    }
+    return 999999;
+}
+
+static void test_capacitance_autorange_fast(void)
+{
+    static const struct { double c; int range; uint32_t max_ms; } k[] = {
+        { 30e-9, 0, 4000 }, { 300e-9, 1, 4000 }, { 3e-6, 2, 6000 }, { 20e-6, 3, 8000 },
+        { 100e-6, 4, 12000 }, { 1000e-6, 5, 16000 }, { 18e-3, 6, 24000 },
+    };
+    char msg[80], worst[80] = "";
+    for (size_t i = 0; i < sizeof k / sizeof k[0]; i++) {
+        uint32_t t = cap_settle_ms(k[i].c, k[i].range, 0.02);
+        snprintf(msg, sizeof msg, "%g F: range %d after %lu ms", k[i].c, k[i].range, (unsigned long)t);
+        TEST_MESSAGE(msg);
+        if (t > k[i].max_ms && !worst[0]) snprintf(worst, sizeof worst, "%s", msg);
+    }
+    TEST_ASSERT_TRUE_MESSAGE(!worst[0], worst);
 }
 
 static const char *ask(const char *cmd, uint32_t ms);
@@ -2255,6 +2289,7 @@ int main(void)
     RUN_TEST(test_fast_recording);
     RUN_TEST(test_record_settings_greyed_while_recording);
     RUN_TEST(test_capacitance_charge_slope);
+    RUN_TEST(test_capacitance_autorange_fast);
     RUN_TEST(test_clock_and_recording_timestamps);
     RUN_TEST(test_hunt_overshoot_goes_back_up_one);
     RUN_TEST(test_ac_waits_for_rms);

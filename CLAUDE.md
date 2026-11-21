@@ -7,11 +7,11 @@ possesses, and writing replacement firmware for it.
 Not a patch on OWON's binary. The plan is `docs/replacement-plan.md`; read it
 before starting new work.
 
-Most analysis has been done **offline**. The meter is now on the bench
-over serial and SWD, but **it is readout-protected** (2026-11-10): SWD can
-identify the chip and nothing more. Firmware goes on **over serial,
-through OWON's bootloader** (`docs/readout-protection.md`). Keep pushing
-the offline track.
+Our firmware runs on the owner's meter (the `xdm1241-ui` build, installed
+over serial through OWON's bootloader). Stock is gone from it for good, and
+the chip is readout-protected, so SWD can identify it and nothing more
+(`docs/readout-protection.md`). Work offline first; bench time is scarce
+("Working with the owner" below).
 
 ---
 
@@ -266,57 +266,34 @@ attic/extension/ code-cave patch path — not the chosen route, still builds
 
 ---
 
-## Where things stand
+## Where things stand (2026-11-18)
 
-Done offline: display driver, AFE driver, UI harness with stock fonts, the
-measurement path implemented and tested in `lib/measure/`, **the application
-running end to end in the host simulator** (`make sim`), SCPI
-grammar and dispatch table, range/unit/menu tables, clock tree, GPIO pin map,
-the three flash records, calibration table layout, and the reading formula
-for every function, plus filter, REL, dB/dBm and temperature.
+**Every stock function runs on the meter's real front end, on its own
+factory calibration**, each checked against reference parts: DC/AC volts,
+DC/AC current on both jacks (all six ranges each), ohms, continuity,
+diode, capacitance 50 nF to 50 mF, frequency, temperature (K; PT100 and
+PT1000 on the confirmed ohms rows). Plus everything stock never had
+(`README.md`, `docs/features.md`). Per-test results and dates:
+`docs/test-plan.md` "Where things stand"; the AFE rows: `docs/afe-table.md`.
 
-Open, and roughly in priority order:
+The meter runs the `xdm1241-ui` build, left on DC volts.
 
-0. ~~Serial install~~ **works on our meter 2026-11-10** (B7): the
-   `xdm1241-serial` build runs on it (`*IDN?`, heartbeat, `DIAG:BOOT?`
-   matches the dumper's copy). Stock is gone for good; use
-   `--stock-gone`. SWD is a
-   dead end on this meter: readout protection ON (`FMC_OBSTAT` 0x03FFFFFE,
-   2026-11-10). **Don't hot-attach SWD to a running stock meter in a
-   loop**: it made the relays chatter.
-1. ~~Real calibration values~~ **done 2026-11-08**: `INT:TXT` on our meter
-   (stock **V4.3.0**) returned the factory record; 0 implausible slots, CJ
-   gain 1732. Kept in `backups/serial-20261108-195034/` (committed).
-2. ~~Panel init sequence~~ **found 2026-11-10** in the bootloader
-   (`docs/bootloader.md`): ILI9488-class, picked by factory bytes
-   +0x7E..+0x80. **Every area-5 update erases 0x08002800-0x0803CFFF**,
-   our log and settings included (backlog B8).
-2d. **HY3131 bus confirmed on the meter 2026-11-11** (read-only): pins
-   by a passive check, then every register read twice (`DIAG:AFE?`,
-   `docs/analog-frontend.md`). The chip sits at power-on defaults. **The
-   per-range mode table can no longer be captured from stock** (erased):
-   **recovered by emulating v2.1.2** (`scripts/emu-afe-table.py`,
-   `docs/afe-table.md`): routing matches a real XDM2041 capture; relays
-   are PA8 and PA13. Provisional until checked on the meter.
-2e. **In progress 2026-11-11** (`docs/afe-table.md`, panel build
-   `DIAG:CAP` / `DIAG:TEMP`): **capacitance** counters work (they need
-   stock's restart: R20 0x70, CTA preset, R20 0x72) but the emulated rows
-   read 4-5x high, per range differently: parked (B16). **Temperature**:
-   cold junction reads 18.7 C, unchecked; thermocouple untested. The meter
-   was left running `xdm1241-panel`; reinstall `xdm1241-ui` for the app.
-2c. **Beeper confirmed on the meter 2026-11-11**: PB11, ~3 kHz
-   (`DIAG:BEEP <ms>` on `xdm1241-panel`).
-2b. **Panel confirmed on the meter 2026-11-11** (`xdm1241-panel`): CS = PB1
-   low, MADCTL 0x28 for landscape (`docs/display.md`).
-3. ~~Keypad bit → key map~~ **done 2026-11-11**: 19 keys on PB5–PB9 ×
-   PA14/PA15/PB3/PB4/PC13 (`docs/hardware.md`, `lib/keypad`). Disconnect
-   the ST-Link's SWD wires: unpowered, it holds PA14 low.
-4. ~~`PWR_EN` handshake~~ **not needed** (2026-11-10): our pin-free build
-   stays on indefinitely. The soft-off path (switching the meter off from
-   firmware) is still unknown.
-5. **Fonts 0 and 3** into the harness; font 4 already renders.
-6. **AFE per-range register values** — adapt Digilent's 27-scale table, or
-   investigate the undocumented `HYREG` SCPI command.
+Open, roughly in priority order (`docs/backlog.md` has the rest):
+
+1. **Launch.** The highlight reel: plan `docs/video-plan.md`, filming
+   checklist `docs/video/shot-list.md`, edit list `docs/video/edit.toml`,
+   rendered by `make reel` (`scripts/reel.py`; raw clips go in `footage/`,
+   gitignored; missing clips render as simulator stills). Then a fresh
+   export of this repo into the public one and a final README read
+   ("Repos and publishing" below).
+2. **Power:** soft power-off and the 0.5-1 mA off-state drain (B46, B48,
+   B49; plan `docs/power-controller.md`).
+3. Known gaps, documented: the 5 V AC range rolls off above ~100 Hz;
+   500 mA AC checked only to 6% of scale; frequency untested at 10 Hz,
+   100 kHz, 1 MHz; ohms has a spot check only; a voltage above ~2.15 V
+   on the V jack leaks into current readings (B59; power mode corrects it).
+4. Every area-5 update erases 0x08002800-0x0803CFFF, so an update wipes
+   our log and settings (B8, documented in `features.md`).
 
 Undocumented SCPI service commands exist: `DOWNLOAD`, `JPG`, `BMP`, `TXT`,
 `WTXT`, `HYREG`, `PROduce`, `KEYRANDOM`, `VERSION`, `MODEL`. **`DOWNLOAD` is
@@ -328,3 +305,65 @@ bootloader, whose area 2 rewrites calibration.** Never enter the hidden
 UTILITY-MATH/DUAL-UP-RANGE-DOWN menus (`community-research.md`). The read-only dump is `INT:TXT`. Only ever use
 `scripts/serial-dump.py`, which refuses the writing commands
 (`docs/settings-dump.md`). Read a handler before firing anything else.
+
+---
+
+## Working with the owner
+
+Standing rules from the owner, on top of the hard rule above:
+
+- **Installs need the owner's explicit OK each time.** The command, with
+  the meter running our firmware:
+  `./scripts/serial-update.py <port> .pio/build/xdm1241-ui/firmware.bin --stock-gone --reset --confirm INSTALL`
+  (port is `/dev/cu.usbserial-*`; on the workshop Mac it has been
+  `/dev/cu.usbserial-110`).
+- **Change relays (functions, ranges) only with the circuit unpowered**,
+  when the owner has leads on a live source. Ask them to switch off first.
+- **Bench time is scarce.** Do everything that doesn't need the meter
+  offline first. Arrive with a short ordered session card: each step's
+  setup, time and the decision it settles; batch steps that share a
+  setup. Honest ~1% accuracy beats polishing past what the owner's
+  references can resolve (~0.2% V/R); say when a line of investigation
+  has stopped paying. Simulated readings shown as real are worse than
+  imperfect real ones.
+- Scripts talking to the panel build must ignore its once-a-second
+  heartbeat (a "wait for quiet" never ends).
+- **Commit as work progresses; push only when asked.** Gate commits on
+  `make check`. Work on `serial-path`; to push:
+  `git push origin serial-path && git checkout main && git pull --ff-only && git merge --no-ff serial-path && git push origin main && git checkout serial-path`.
+- **Docs move toward presenting the firmware** (Conventions above).
+
+## Repos and publishing
+
+- **halucinatedhex/OpenOWON-dev** (private): this repo, full history,
+  `backups/` and OWON's v2.1.2 image `firmware/XDM1041_OS_V2.1.2_20210525.bin`
+  committed (OWON's code: never public; the export drops both). The
+  workshop Mac's clone may still point at the old name: `git remote
+  set-url origin https://github.com/halucinatedhex/OpenOWON-dev.git`.
+- **halucinatedhex/OpenOWON**: the public face, one squashed GPL-3.0
+  commit exported from dev without `backups/`. **Private until the reel
+  is done; never change its visibility without the owner.** Sync later
+  work by a fresh export as a new commit, not a merge (unrelated
+  histories). The owner's local copy is `~/src/OpenOWON-public`.
+- **No personal information.** Commits as `halucinatedhex
+  <353946089+halucinatedhex@users.noreply.github.com>` (set in this
+  repo's git config; set it on a new clone). Strip photo metadata
+  before committing (`exiftool -all=`; iPhone photos carry GPS).
+- **Never commit** other `firmware/*.bin`, `docs/manual/`, `docs/datasheets/`,
+  `lib/ui/stock_fonts.h` (generated), `footage/`, `screenlog.0`,
+  `__pycache__`. OWON/HYCON material is the rule; openly licensed
+  material (the Liberation-derived label font) is committed with its
+  licence.
+
+## New machine
+
+1. Clone OpenOWON-dev; set the git identity above.
+2. `make setup` (checks the committed v2.1.2 image's hash, generates
+   `lib/ui/stock_fonts.h`, which the simulator and the reel need).
+3. Tools: PlatformIO (`pio`; `make portable` fetches the ARM toolchain),
+   `pip install pillow numpy pyserial` (`unicorn` for the emulator),
+   `brew install ffmpeg` for the reel, Ghidra + `openjdk@25` only for
+   reverse engineering.
+4. `make check` should pass with no hardware attached.
+5. Claude's memory for this project is per machine; everything it needs
+   is in this file and the docs.

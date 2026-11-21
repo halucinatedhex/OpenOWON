@@ -35,6 +35,7 @@ void acq_select(acq_t *a, meas_fn_t fn, int range)
     a->st = ACQ_IDLE;
     a->since2 = 0;
     a->cj_period = ACQ_CJ_PERIOD_MS;     /* track closely again after a change */
+    a->ct_short = false;                  /* the app sets it when ranging up (B60) */
 }
 
 /* DC volts and current: their discards are the filter's, which scale with
@@ -75,7 +76,7 @@ static void configure(acq_t *a, const platform_t *p, meas_fn_t fn, int range,
     a->flags = 0;
     a->discard = (fn == MEAS_OHM2 || fn == MEAS_OHM4 || fn == MEAS_CONT || fn == MEAS_DIODE ||
                   (fn == MEAS_TEMP && range > 0))     /* PT100/PT1000: an ohms reading */
-                 ? ACQ_DISCARD_OHM : ACQ_DISCARD;
+                 ? ACQ_DISCARD_OHM : fn == MEAS_CAP ? ACQ_DISCARD_CAP : ACQ_DISCARD;
     a->st = next;
 }
 
@@ -133,6 +134,7 @@ static bool convert(acq_t *a, const platform_t *p, meas_fn_t fn, int range, acq_
     out->aux = 0.0;
     out->emf_mv = NAN;
     out->rtd_ohm = NAN;
+    out->settling = false;
     out->overrange = false;
     out->secondary = false;
 
@@ -150,6 +152,7 @@ static bool convert(acq_t *a, const platform_t *p, meas_fn_t fn, int range, acq_
         hy3131_read_burst(HY_CTB, cb, 3);
         hy3131_read_burst(HY_CTC, cc, 3);
         out->value = meas_cap_counter(cal, range, le24(cb), le24(cc));
+        a->ct_cycles = le24(cb);
         (void)hy3131_read8(HY_INTF);           /* drop a late done flag: it would end the next gate */
         a->flags &= (uint8_t)~HY_F_CT;
         ct_restart(MEAS_CAP);
@@ -293,7 +296,7 @@ static bool cap_slope_poll(acq_t *a, const platform_t *p, acq_sample_t *out, uin
     a->cap_charging = false;
     if (a->cap_full && a->cap_n == 0 && !(a->cap_rest_v < ACQ_CAP_START_V)) return false;
     out->aux = 0.0; out->emf_mv = NAN; out->rtd_ohm = NAN;
-    out->overrange = false; out->secondary = false;
+    out->overrange = false; out->secondary = false; out->settling = false;
     double rate = cap_fit(a);
     if (a->cap_n < ACQ_CAP_MIN_PTS) out->value = a->cap_full ? 0.0 : NAN;
     else out->value = meas_cap_rate(p->cal, a->range, rate);
@@ -356,8 +359,10 @@ bool acq_poll(acq_t *a, const platform_t *p, acq_sample_t *out)
             return false;
         }
         if (!ready(a, need_flag(a->fn)) && !((a->fn == MEAS_CAP || a->fn == MEAS_FREQ) && ct_stopped(a, now))) {
-            uint32_t lim = a->range >= 4 ? ACQ_CT_TIMEOUT_TOP_MS : ACQ_CT_TIMEOUT_MS;
-            if (a->fn != MEAS_CAP || now - a->ct_gate_at < lim) return false;
+            if (a->fn != MEAS_CAP) return false;
+            uint32_t lim = a->ct_short ? acq_ct_short_ms[a->range]
+                         : a->range >= 4 ? ACQ_CT_TIMEOUT_TOP_MS : ACQ_CT_TIMEOUT_MS;
+            if (now - a->ct_gate_at < lim) return false;
             /* No cycle finished: far too big for this range. */
             *out = (acq_sample_t){ .value = NAN, .emf_mv = NAN, .rtd_ohm = NAN, .raw = NAN, .overrange = true };
             ct_restart(MEAS_CAP);
@@ -368,7 +373,17 @@ bool acq_poll(acq_t *a, const platform_t *p, acq_sample_t *out)
         if (!convert(a, p, a->fn, a->range, out)) return false;
         if (a->fn == MEAS_CAP) a->ct_gate_at = now;
         user_cal(a, a->fn, a->range, out);
-        if (a->discard) { a->discard--; return false; }
+        if (a->discard) {
+            a->discard--;
+            /* B60: capacitance passes it up marked, for ranging only (a gate
+             * is ~1.2 s), if it counted a few whole cycles: the first gate
+             * after a change can end on a leftover partial cycle and read
+             * anything (on our meter, 2026-11-19). */
+            if (a->fn != MEAS_CAP || a->ct_cycles < ACQ_CT_SETTLE_CYCLES) return false;
+            out->settling = true;
+            return true;
+        }
+        if (a->fn == MEAS_CAP) a->ct_short = false;   /* it reads here: full timeouts from now */
         if (a->fn2 < MEAS_NFUNC && pair_ok(a, p)
             && ++a->since2 >= (a->sec_every ? a->sec_every : ACQ_DUAL_PRIMARY)) {
             a->since2 = 0;                          /* the secondary's turn next */

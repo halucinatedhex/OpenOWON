@@ -78,7 +78,7 @@ make check      # should end with both target builds SUCCESS
 | `make test` | all host unit tests (Unity, `pio test -e native`) | about 30 s |
 | `pio test -e native -f test_app` | one suite | seconds |
 | `make sim` | every scenario in `scenarios/`; screenshots in `build/sim-*.png` | seconds |
-| `make screens` | `make sim`, then copies six shots to `docs/screens/` (the README's pictures). Run it when the UI changes | seconds |
+| `make screens` | `make sim`, then copies its shots to `docs/screens/`, and `scripts/readme-media.py` renders the hero shots, histograms and the two GIFs (the README's pictures). Run it when the UI changes | seconds |
 | `make ui` | every screen in every theme, to `build/ui-*.png` | seconds |
 | `make portable` | the on-meter layers built for Cortex-M4 with `-Werror` | seconds |
 | `make check` | all of the above plus script tests and both firmware images | about a minute |

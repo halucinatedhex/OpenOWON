@@ -40,6 +40,14 @@
  * steps up. A 260 uF part takes ~3 s on 500 uF (docs/features.md). */
 #define ACQ_CT_TIMEOUT_MS     4000u
 #define ACQ_CT_TIMEOUT_TOP_MS 9000u   /* range 4, 500 uF */
+/* B60: while autoranging climbs onto a range (ct_short), over range is
+ * called sooner, by range. A reading takes the gate (1.07 s) plus up to one
+ * charge cycle, and a cycle is ~21 ms per uF on 500 uF, ~3.25x that on
+ * 50 uF and ~10x more on 5 uF (on our meter, 2026-11-19). So these send up
+ * parts above ~0.5 uF (500 nF range), ~2.7 uF (5 uF), ~27 uF (50 uF) and
+ * ~230 uF (500 uF), each of which the next range up reads well. */
+#define ACQ_CT_SETTLE_CYCLES 3u
+static const uint16_t acq_ct_short_ms[5] = { 2000u, 2000u, 3000u, 3000u, 6000u };
 #define ACQ_CAP_MIN_PTS   3
 #define ACQ_CAP_FIT_MAX_V 0.60      /* above, the rise flattens toward AD1's clip (on our meter,
                                        1000 uF: 0.079 a conversion below, 0.072 at 0.64) */
@@ -57,6 +65,9 @@ typedef enum {
 /* Resistance needs one more: the ohms source settles (on our meter, the
  * third conversion after configuring was still 1% low). */
 #define ACQ_DISCARD_OHM 3
+/* Capacitance, ranges 0-4: one (B60). Each is a whole ~1.2 s gate, and the
+ * first gate after configuring is often empty anyway (no cycle: skipped). */
+#define ACQ_DISCARD_CAP 1
 
 typedef struct {
     double value;       /* SI, or degrees C for temperature */
@@ -66,6 +77,7 @@ typedef struct {
     double raw;         /* value before the user calibration (B31) */
     bool   overrange;   /* the conversion itself flagged it (temperature, cap) */
     bool   secondary;   /* dual display: this is the secondary function's reading */
+    bool   settling;    /* capacitance: one the discards would drop; good enough to range on (B60) */
 } acq_sample_t;
 
 typedef struct {
@@ -78,6 +90,8 @@ typedef struct {
     uint32_t    ct_check_at;    /* capacitance: last check that the counters stopped */
     uint32_t    ct_prev;        /* CTA at that check */
     uint32_t    ct_gate_at;     /* capacitance: when this counter reading began */
+    bool        ct_short;       /* capacitance: short over-range timeout until a reading (B60) */
+    uint32_t    ct_cycles;      /* capacitance: CTB of the last reading */
     bool        cal_mode;
     bool        fast;           /* hunting: convert fast where acq_fast_ok (B10d) */
 
